@@ -10,6 +10,14 @@
 !.yarn/releases
 !.yarn/versions
 
+AGENTS.md
+.next
+CLAUDE.md
+
+.gitignore
+
+req-res
+
 # testing
 /coverage
 
