@@ -1,0 +1,90 @@
+﻿import type { AuthUser, UserRole } from "@/types";
+
+const TOKEN_KEY = "dwellio.accessToken";
+const USER_KEY = "dwellio.user";
+
+export const ROLE_HOME: Record<UserRole, string> = {
+  ADMIN: "/admin",
+  OWNER: "/owner/dashboard",
+  MANAGER: "/manager/dashboard",
+  TENANT: "/tenant/dashboard",
+};
+
+function isBrowser() {
+  return typeof window !== "undefined";
+}
+
+function getCookie(name: string): string | null {
+  if (!isBrowser()) return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    const part = parts.pop();
+    if (part === undefined) return null;
+    return part.split(";").shift() || null;
+  }
+  return null;
+}
+
+function setCookie(name: string, value: string, maxAgeSeconds = 86400) {
+  if (!isBrowser()) return;
+  document.cookie =
+    name +
+    "=" +
+    value +
+    "; path=/; max-age=" +
+    maxAgeSeconds +
+    "; SameSite=Lax";
+}
+
+function deleteCookie(name: string) {
+  if (!isBrowser()) return;
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+}
+
+export function readAccessToken() {
+  if (!isBrowser()) return null;
+  return getCookie("accessToken") || window.localStorage.getItem(TOKEN_KEY);
+}
+
+export function readRefreshToken() {
+  if (!isBrowser()) return null;
+  return getCookie("refreshToken");
+}
+
+export function readStoredUser(): AuthUser | null {
+  if (!isBrowser()) return null;
+  const raw = getCookie("authUser") || window.localStorage.getItem(USER_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as AuthUser;
+  } catch {
+    deleteCookie("authUser");
+    window.localStorage.removeItem(USER_KEY);
+    return null;
+  }
+}
+
+export function saveSession(
+  user: AuthUser,
+  accessToken: string,
+  refreshToken?: string,
+) {
+  if (!isBrowser()) return;
+  window.localStorage.setItem(TOKEN_KEY, accessToken);
+  window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+  setCookie("accessToken", accessToken, 60 * 60 * 24);
+  setCookie("authUser", JSON.stringify(user), 60 * 60 * 24);
+  if (refreshToken) {
+    setCookie("refreshToken", refreshToken, 60 * 60 * 24 * 7);
+  }
+}
+
+export function clearSession() {
+  if (!isBrowser()) return;
+  window.localStorage.removeItem(TOKEN_KEY);
+  window.localStorage.removeItem(USER_KEY);
+  deleteCookie("accessToken");
+  deleteCookie("refreshToken");
+  deleteCookie("authUser");
+}
