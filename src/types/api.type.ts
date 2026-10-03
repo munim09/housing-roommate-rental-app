@@ -22,6 +22,17 @@ export interface ApiErrorBody {
   errors?: Record<string, string[]>;
 }
 
+/**
+ * Failure payload. The backend reuses the success envelope with
+ * `success: false` and swaps `data` for an `error` section.
+ */
+export interface ApiErrorResponse {
+  success: false;
+  statusCode: number;
+  message?: string;
+  error?: ApiErrorBody;
+}
+
 export interface ApiError {
   statusCode: number;
   message: string;

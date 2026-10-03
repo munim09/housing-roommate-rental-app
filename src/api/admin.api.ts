@@ -68,23 +68,6 @@ export function getAdminUsers(params?: AdminUserQuery, headers?: HeadersInit) {
   });
 }
 
-export function createCity(payload: { name: string }) {
-  return apiClient<ApiResponse<{ id: string; name: string }>>("/admin/cities", {
-    method: "POST",
-    body: payload,
-  });
-}
-
-export function createArea(payload: { name: string; cityId: string }) {
-  return apiClient<ApiResponse<{ id: string; name: string; cityId: string }>>(
-    "/admin/areas",
-    {
-      method: "POST",
-      body: payload,
-    },
-  );
-}
-
 export function updateUserStatus(userId: string, status: AdminUserStatus) {
   return apiClient<ApiResponse<{ id: string; status: AdminUserStatus }>>(
     `/admin/users/${userId}/status`,

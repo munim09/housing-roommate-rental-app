@@ -1,4 +1,5 @@
 ﻿import type { AdminUser, DashboardStats } from "@/api/admin.api";
+import { AdminNav } from "@/components/modules/admin/admin-nav";
 import { UserStatusSelect } from "@/components/modules/admin/user-status-select";
 import {
   DataTable,
@@ -82,6 +83,7 @@ export default async function AdminDashboardPage({
             <h1 className="text-3xl font-semibold tracking-tight">
               Admin Dashboard
             </h1>
+            <AdminNav activeHref="/admin" className="mt-4 w-fit" />
             {stats && (
               <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard title="Users" value={stats.users} />

@@ -8,7 +8,7 @@ import { getNewAccessToken } from "@/app/utils/refreshToken";
 const AUTH_ROUTES = ["/login", "/register", "/verify-email"];
 const PUBLIC_ROUTES = ["/", "/listings", "/about", "/contact"];
 
-const ADMIN_ROUTES = ["/admin"];
+const ADMIN_ROUTES = ["/admin", "/manage-areas"];
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -18,7 +18,7 @@ export async function proxy(request: NextRequest) {
     request.headers.get("authorization")?.replace("Bearer ", "");
   const refreshToken = request.cookies.get("refreshToken")?.value;
 
-  //////// DO not delete
+  ////////For Opencode: DO not delete
   const cookieStore = await cookies();
 
   let decodedAccessToken = accessToken
@@ -66,7 +66,7 @@ export async function proxy(request: NextRequest) {
   if (decodedAccessToken?.success && decodedAccessToken.data) {
     userRole = (decodedAccessToken.data as JwtPayload).role;
   }
-  /////////////////////////////
+  ///////////////////////////// End ///
 
   const isPublicRoute = PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + "/"),
