@@ -15,6 +15,14 @@ const nextConfig: NextConfig = {
         port: backendUrl.port,
         pathname: "/**",
       },
+      // Flat and room images are pushed to Cloudinary and the backend stores
+      // absolute `res.cloudinary.com` URLs, so that host is a separate origin.
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };

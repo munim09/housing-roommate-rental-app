@@ -5,7 +5,8 @@ import type { Meta } from "@/types";
 
 export interface DataTableColumn<T> {
   key: string;
-  header: string;
+  /** A node so a column can hide its header with `sr-only` and stay accessible. */
+  header: React.ReactNode;
   /** Falls back to the raw value when omitted. */
   cell?: (row: T) => React.ReactNode;
   className?: string;

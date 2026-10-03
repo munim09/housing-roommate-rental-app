@@ -1,3 +1,5 @@
+import type { FlatRoomSummary } from "./flat.type";
+
 /** Mirrors the backend `PropertyType` enum — anything else is rejected with 400. */
 export const PROPERTY_TYPES = ["SINGLE_FLAT", "MULTI_FLAT"] as const;
 
@@ -16,22 +18,19 @@ export const RESOURCE_STATUSES = ["ACTIVE", "INACTIVE", "ARCHIVED"] as const;
 
 export type ResourceStatus = (typeof RESOURCE_STATUSES)[number];
 
-/** Rooms nest inside flats inside properties on `GET /owner/properties`. */
-export interface OwnerRoom {
-  id: string;
-  roomNumber: string;
-  name?: string | null;
-  status: ResourceStatus;
-}
-
-export interface OwnerFlat {
+/**
+ * A flat as `GET /owner/properties` nests it under a property — the identity and
+ * capacity columns only, with no images or relations. `GET /owner/flats` is the
+ * richer shape.
+ */
+export interface PropertyFlat {
   id: string;
   flatNumber: string;
+  status: ResourceStatus;
   floorNumber?: number | null;
   bedrooms?: number | null;
   bathrooms?: number | null;
-  status: ResourceStatus;
-  rooms: OwnerRoom[];
+  rooms: FlatRoomSummary[];
 }
 
 export interface OwnerPropertyArea {
@@ -75,10 +74,9 @@ export interface OwnerProperty {
   postalCode?: string | null;
   area?: OwnerPropertyArea | null;
   /** Empty for a property the owner has not broken into flats yet. */
-  flats: OwnerFlat[];
+  flats: PropertyFlat[];
 }
 
-/** Flat totals are needed for the header stats, so they are derived here. */
 export interface OwnerPropertyTotals {
   properties: number;
   flats: number;

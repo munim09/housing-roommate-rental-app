@@ -36,3 +36,20 @@ export function formatCurrency(amount?: number | null): string {
     maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
   }).format(amount);
 }
+
+/**
+ * `areaSqFt` is a `Decimal(10,2)` column, so the backend serialises it as a
+ * string ("1500", "1500.00"). Parsing it means a table cell never prints a raw
+ * decimal string, and a fractional area keeps its two places.
+ */
+export function formatAreaSqFt(value?: string | number | null): string {
+  if (value === null || value === undefined || value === "") return "—";
+
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed)) return "—";
+
+  return `${new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 2,
+  }).format(parsed)} sq ft`;
+}

@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { jwtUtils } from "@/app/utils/jwt";
 import { getNewAccessToken } from "@/app/utils/refreshToken";
+import { roleHome } from "@/lib/server-session";
 import type { UserRole } from "@/types";
 
 const AUTH_ROUTES = ["/login", "/register", "/verify-email"];
@@ -40,6 +41,7 @@ export async function proxy(request: NextRequest) {
 
   ////////For Opencode: DO not delete
   const cookieStore = await cookies();
+  ///////////////////////////// End ///
 
   let decodedAccessToken = accessToken
     ? jwtUtils.verifyToken(accessToken, process.env.JWT_ACCESS_SECRET as string)
@@ -75,18 +77,25 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  let userRole = null;
-
   if (!decodedAccessToken?.success) {
-    //token has expired or is invalid, clear the cookies
+    // The cookie is expired, forged or corrupt. Clearing it stops every later
+    // request from carrying it, and `hasValidAccess` makes the routing below
+    // treat the visitor as signed out.
     cookieStore.delete("accessToken");
     cookieStore.delete("authUser");
   }
 
-  if (decodedAccessToken?.success && decodedAccessToken.data) {
-    userRole = (decodedAccessToken.data as JwtPayload).role;
-  }
-  ///////////////////////////// End ///
+  /**
+   * Authorisation is driven by the *verified* token, never by the `authUser`
+   * cookie — that cookie is written by the browser with `document.cookie`, so it
+   * is not httpOnly and anyone can rewrite it. Using the signed claims here is
+   * what stops a tenant hand-setting `authUser={"role":"OWNER"}`.
+   */
+  const hasValidAccess = Boolean(decodedAccessToken?.success);
+  const userRole =
+    decodedAccessToken?.success && decodedAccessToken.data
+      ? (decodedAccessToken.data as JwtPayload).role
+      : null;
 
   const isPublicRoute = PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + "/"),
@@ -98,29 +107,41 @@ export async function proxy(request: NextRequest) {
     matchesPrefix(pathname, entry.prefixes),
   )?.role;
 
-  if (!accessToken && !refreshToken && !isPublicRoute && !isAuthRoute) {
+  // An unusable token counts as signed out. Deciding on the raw cookie instead
+  // let a corrupt token through to render a route's loading skeleton.
+  const signedIn = hasValidAccess || Boolean(decodedRefreshToken?.success);
+
+  if (!signedIn && !isPublicRoute && !isAuthRoute) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (accessToken && isAuthRoute) {
-    const from = request.nextUrl.searchParams.get("from") || "/dashboard";
-    return NextResponse.redirect(new URL(from, request.url));
+  if (hasValidAccess && isAuthRoute) {
+    // `from` is where the visitor was originally headed. Without it, fall back to
+    // the role's own landing page — the old `/dashboard` default is not a route
+    // in this app, so it produced a 404 for every signed-in user.
+    const from = request.nextUrl.searchParams.get("from");
+
+    const destination = from
+      ? // Only same-origin paths, so `?from=` cannot be used as an open redirect.
+        from.startsWith("/") && !from.startsWith("//")
+        ? from
+        : roleHome(userRole as UserRole)
+      : roleHome(userRole as UserRole);
+
+    return NextResponse.redirect(new URL(destination, request.url));
   }
 
-  if (requiredRole && accessToken) {
-    try {
-      const userCookie = request.cookies.get("authUser")?.value;
-      if (userCookie) {
-        const user = JSON.parse(userCookie) as { role?: UserRole };
-        if (user.role && user.role !== requiredRole) {
-          return NextResponse.redirect(new URL("/", request.url));
-        }
-      }
-    } catch {
-      // A malformed cookie cannot be read here, but each route group's layout
-      // re-checks the role and will redirect on its own.
+  if (requiredRole && signedIn) {
+    if (!hasValidAccess) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("from", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    if (userRole !== requiredRole) {
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 

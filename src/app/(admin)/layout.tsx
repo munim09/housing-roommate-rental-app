@@ -1,12 +1,13 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ROLE_HOME } from "@/lib/session";
-import type { AuthUser } from "@/types";
+import { getSessionClaims, roleHome } from "@/lib/server-session";
 
 /**
- * Every route in this group is admin-only. `src/proxy.ts` already bounces
- * non-admins, but repeating the check in the layout makes the rule belong to the
- * routes themselves rather than to a matcher someone has to remember to update.
+ * Every route in this group is admin-only.
+ *
+ * The role is read from the signed access token rather than the `authUser`
+ * cookie, so a hand-edited cookie cannot open this surface. The proxy applies
+ * the same rule, but repeating the check here means the rule belongs to the
+ * routes instead of to a matcher someone has to remember to update.
  *
  * Props are typed by hand because a route-group layout covers several routes,
  * so `LayoutProps<>` — which only accepts the root route — does not apply.
@@ -16,28 +17,14 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  const rawUser = cookieStore.get("authUser")?.value;
+  const claims = await getSessionClaims();
 
-  if (!accessToken || !rawUser) {
+  if (!claims) {
     redirect("/login");
   }
 
-  let user: AuthUser | null = null;
-
-  try {
-    user = JSON.parse(rawUser) as AuthUser;
-  } catch {
-    user = null;
-  }
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  if (user.role !== "ADMIN") {
-    redirect(ROLE_HOME[user.role] ?? "/");
+  if (claims.role !== "ADMIN") {
+    redirect(roleHome(claims.role));
   }
 
   return children;
