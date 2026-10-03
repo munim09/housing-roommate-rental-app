@@ -2,5 +2,6 @@ export * from "./admin.hook";
 export * from "./advertisement.hook";
 export * from "./area.hook";
 export * from "./auth.hook";
+export * from "./property.hook";
 export * from "./use-debounce";
 export * from "./use-error-toast";

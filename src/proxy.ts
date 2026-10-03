@@ -4,11 +4,31 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { jwtUtils } from "@/app/utils/jwt";
 import { getNewAccessToken } from "@/app/utils/refreshToken";
+import type { UserRole } from "@/types";
 
 const AUTH_ROUTES = ["/login", "/register", "/verify-email"];
-const PUBLIC_ROUTES = ["/", "/listings", "/about", "/contact"];
+// `/logout` is public so signing out never bounces an anonymous visitor to
+// `/login?from=/logout` — the handler clears nothing and redirects home anyway.
+const PUBLIC_ROUTES = ["/", "/listings", "/about", "/contact", "/logout"];
 
 const ADMIN_ROUTES = ["/admin", "/manage-areas"];
+
+const OWNER_ROUTES = ["/owner"];
+
+/**
+ * Surfaces that only one role may open. `/manage-areas` sits outside `/admin`
+ * because it is its own route, so both admin prefixes are listed explicitly.
+ */
+const ROLE_GATED_ROUTES: { prefixes: string[]; role: UserRole }[] = [
+  { prefixes: ADMIN_ROUTES, role: "ADMIN" },
+  { prefixes: OWNER_ROUTES, role: "OWNER" },
+];
+
+function matchesPrefix(pathname: string, prefixes: string[]) {
+  return prefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -74,9 +94,9 @@ export async function proxy(request: NextRequest) {
   const isAuthRoute = AUTH_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + "/"),
   );
-  const isAdminRoute = ADMIN_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route + "/"),
-  );
+  const requiredRole = ROLE_GATED_ROUTES.find((entry) =>
+    matchesPrefix(pathname, entry.prefixes),
+  )?.role;
 
   if (!accessToken && !refreshToken && !isPublicRoute && !isAuthRoute) {
     const loginUrl = new URL("/login", request.url);
@@ -89,17 +109,18 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(from, request.url));
   }
 
-  if (isAdminRoute && accessToken) {
+  if (requiredRole && accessToken) {
     try {
       const userCookie = request.cookies.get("authUser")?.value;
       if (userCookie) {
-        const user = JSON.parse(userCookie);
-        if (user.role !== "ADMIN") {
+        const user = JSON.parse(userCookie) as { role?: UserRole };
+        if (user.role && user.role !== requiredRole) {
           return NextResponse.redirect(new URL("/", request.url));
         }
       }
-    } catch (e) {
-      // ignore
+    } catch {
+      // A malformed cookie cannot be read here, but each route group's layout
+      // re-checks the role and will redirect on its own.
     }
   }
 

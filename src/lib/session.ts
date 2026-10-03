@@ -3,6 +3,16 @@
 const TOKEN_KEY = "dwellio.accessToken";
 const USER_KEY = "dwellio.user";
 
+/**
+ * The cookies `/auth/login` sets. They are httpOnly, so only a server handler
+ * can delete them — that is what the `/logout` route is for.
+ */
+export const SESSION_COOKIES = {
+  accessToken: "accessToken",
+  refreshToken: "refreshToken",
+  user: "authUser",
+} as const;
+
 export const ROLE_HOME: Record<UserRole, string> = {
   ADMIN: "/admin",
   OWNER: "/owner/dashboard",
@@ -44,17 +54,21 @@ function deleteCookie(name: string) {
 
 export function readAccessToken() {
   if (!isBrowser()) return null;
-  return getCookie("accessToken") || window.localStorage.getItem(TOKEN_KEY);
+  return (
+    getCookie(SESSION_COOKIES.accessToken) ??
+    window.localStorage.getItem(TOKEN_KEY)
+  );
 }
 
 export function readRefreshToken() {
   if (!isBrowser()) return null;
-  return getCookie("refreshToken");
+  return getCookie(SESSION_COOKIES.refreshToken);
 }
 
 export function readStoredUser(): AuthUser | null {
   if (!isBrowser()) return null;
-  const raw = getCookie("authUser") || window.localStorage.getItem(USER_KEY);
+  const raw =
+    getCookie(SESSION_COOKIES.user) ?? window.localStorage.getItem(USER_KEY);
   if (!raw) return null;
   try {
     return JSON.parse(raw) as AuthUser;
@@ -73,10 +87,10 @@ export function saveSession(
   if (!isBrowser()) return;
   window.localStorage.setItem(TOKEN_KEY, accessToken);
   window.localStorage.setItem(USER_KEY, JSON.stringify(user));
-  setCookie("accessToken", accessToken, 60 * 60 * 24);
-  setCookie("authUser", JSON.stringify(user), 60 * 60 * 24);
+  setCookie(SESSION_COOKIES.accessToken, accessToken, 60 * 60 * 24);
+  setCookie(SESSION_COOKIES.user, JSON.stringify(user), 60 * 60 * 24);
   if (refreshToken) {
-    setCookie("refreshToken", refreshToken, 60 * 60 * 24 * 7);
+    setCookie(SESSION_COOKIES.refreshToken, refreshToken, 60 * 60 * 24 * 7);
   }
 }
 
@@ -84,7 +98,7 @@ export function clearSession() {
   if (!isBrowser()) return;
   window.localStorage.removeItem(TOKEN_KEY);
   window.localStorage.removeItem(USER_KEY);
-  deleteCookie("accessToken");
-  deleteCookie("refreshToken");
-  deleteCookie("authUser");
+  deleteCookie(SESSION_COOKIES.accessToken);
+  deleteCookie(SESSION_COOKIES.refreshToken);
+  deleteCookie(SESSION_COOKIES.user);
 }

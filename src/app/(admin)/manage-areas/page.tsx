@@ -22,6 +22,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { authedFetchJson } from "@/lib/auth-fetched";
+import { formatDate } from "@/lib/format";
 import type { Area, City } from "@/types";
 
 export const metadata = {
@@ -48,16 +49,6 @@ function queryString(entries: Record<string, string | number | undefined>) {
   }
 
   return params.toString();
-}
-
-function formatDate(value?: string) {
-  if (!value) return "—";
-
-  return new Date(value).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
 }
 
 export default async function ManageAreasPage({
