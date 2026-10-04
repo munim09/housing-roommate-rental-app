@@ -4,6 +4,7 @@ import { BedDoubleIcon, PencilIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { OwnerFlat } from "@/types";
 import { EditFlatDialog } from "./edit-flat-dialog";
+import { FlatImagesDialog } from "./flat-images-dialog";
 
 export interface FlatRowActionsProps {
   flat: OwnerFlat;
@@ -20,6 +21,7 @@ export interface FlatRowActionsProps {
 export function FlatRowActions({ flat }: FlatRowActionsProps) {
   return (
     <div className="flex items-center justify-end gap-1">
+      <FlatImagesDialog flat={flat} />
       <EditFlatDialog flat={flat} />
 
       <Button

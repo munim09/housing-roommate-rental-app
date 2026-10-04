@@ -1,5 +1,7 @@
-import apiClient from "@/lib/api-client";
+import apiClient, { apiUrl } from "@/lib/api-client";
+import { type UploadProgress, uploadMultipart } from "@/lib/upload-multipart";
 import type {
+  AddedFlatImages,
   ApiResponse,
   CreatedFlat,
   CreateFlatInput,
@@ -61,5 +63,56 @@ export function updateFlat(flatId: string, payload: UpdateFlatInput) {
   return apiClient<ApiResponse<UpdatedFlat>>(`/owner/flats/${flatId}`, {
     method: "PATCH",
     body: payload,
+  });
+}
+
+/** Both photo routes hang off the flat, so the path is built in one place. */
+function flatImagesPath(flatId: string) {
+  return `/owner/flats/${flatId}/images`;
+}
+
+/**
+ * `POST /owner/flats/:flatId/images` — owner only, `multipart/form-data`.
+ *
+ * Unlike the create route there is no `data` part here: every part is a file and
+ * they all share the key `images`, so a flat that already exists can be given
+ * more photos without resending its columns. The backend caps a request at
+ * `MAX_FLAT_IMAGES` files.
+ *
+ * This goes through `XMLHttpRequest` rather than `ofetch` so the dialog can show
+ * upload progress — `fetch` still has no upload progress event — while reading
+ * the same envelope back and rejecting failures the same way.
+ *
+ * The response only carries the new Cloudinary URLs, so the refreshed list is
+ * the source of truth for image ids afterwards.
+ */
+export function addFlatImages(
+  flatId: string,
+  images: File[],
+  onProgress?: (progress: UploadProgress) => void,
+) {
+  const form = new FormData();
+
+  for (const image of images) {
+    form.append("images", image);
+  }
+
+  return uploadMultipart<AddedFlatImages>({
+    url: apiUrl(flatImagesPath(flatId)),
+    body: form,
+    onProgress,
+  });
+}
+
+/**
+ * `DELETE /owner/flats/:flatId/images/:imageId` — owner only, no body.
+ *
+ * `imageId` is the `AccommodationImage` id, not the Cloudinary URL: the ids come
+ * from `GET /owner/flats` on `flat.images`. Nothing useful comes back in `data`,
+ * so only the envelope matters and the list is refetched to confirm the change.
+ */
+export function removeFlatImage(flatId: string, imageId: string) {
+  return apiClient<ApiResponse<null>>(`${flatImagesPath(flatId)}/${imageId}`, {
+    method: "DELETE",
   });
 }

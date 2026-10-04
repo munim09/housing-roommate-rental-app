@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import { formatAreaSqFt } from "@/lib/format";
 import { type OwnerFlat, primaryFlatImage } from "@/types";
+import { FlatImagesButton } from "./flat-images-dialog";
 import { EditFlatButton } from "./flat-row-actions";
 
 export interface FlatRoomsSheetProps {
@@ -167,6 +168,9 @@ export function FlatRoomsSheet({ flat, closeHref }: FlatRoomsSheetProps) {
             <BedDoubleIcon aria-hidden="true" />
             Add room
           </Button>
+          {/* Same photo manager as the table row, so a flat's images can be
+              changed without leaving the drawer. */}
+          <FlatImagesButton flat={flat} />
           <EditFlatButton flat={flat} />
         </SheetFooter>
       </SheetContent>

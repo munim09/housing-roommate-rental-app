@@ -1,7 +1,8 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFlat, updateFlat } from "@/api";
+import { addFlatImages, createFlat, removeFlatImage, updateFlat } from "@/api";
+import type { UploadProgress } from "@/lib/upload-multipart";
 import type { CreateFlatInput, UpdateFlatInput } from "@/types";
 
 export const flatKeys = {
@@ -54,6 +55,43 @@ export function useUpdateFlat() {
       flatId: string;
       payload: UpdateFlatInput;
     }) => updateFlat(flatId, payload),
+    onSuccess: invalidateFlats,
+  });
+}
+
+export interface AddFlatImagesVariables {
+  flatId: string;
+  images: File[];
+  /** Forwarded to the uploader so the dialog can render a progress bar. */
+  onProgress?: (progress: UploadProgress) => void;
+}
+
+/**
+ * `POST /owner/flats/:flatId/images`.
+ *
+ * The response holds only the new URLs, so the flat list is invalidated to pick
+ * up the `AccommodationImage` rows — and their ids, which the delete route needs.
+ */
+export function useAddFlatImages() {
+  const invalidateFlats = useInvalidateFlats();
+
+  return useMutation({
+    mutationFn: ({ flatId, images, onProgress }: AddFlatImagesVariables) =>
+      addFlatImages(flatId, images, onProgress),
+    onSuccess: invalidateFlats,
+  });
+}
+
+/**
+ * `DELETE /owner/flats/:flatId/images/:imageId`. Same reason for invalidating:
+ * a delete changes both the photo list and which image is primary.
+ */
+export function useRemoveFlatImage() {
+  const invalidateFlats = useInvalidateFlats();
+
+  return useMutation({
+    mutationFn: ({ flatId, imageId }: { flatId: string; imageId: string }) =>
+      removeFlatImage(flatId, imageId),
     onSuccess: invalidateFlats,
   });
 }

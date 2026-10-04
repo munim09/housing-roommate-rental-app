@@ -30,6 +30,19 @@ export const apiClient = ofetch.create({
   },
 });
 
+/**
+ * Absolute URL for a backend path.
+ *
+ * Needed by the handful of calls that cannot go through `apiClient` — currently
+ * the multipart uploader, which needs `XMLHttpRequest` to report progress. Both
+ * prefix pieces are joined here so that call cannot drift from `baseURL`.
+ */
+export function apiUrl(path: string) {
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+
+  return `${BASE_URL}${API_PREFIX}${cleanPath}`;
+}
+
 /** Normalises anything thrown by ofetch into a predictable shape for toasts. */
 export function toApiError(error: unknown): ApiError {
   if (error && typeof error === "object") {

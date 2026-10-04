@@ -7,6 +7,13 @@ export interface FlatImage {
   isPrimary: boolean;
 }
 
+/**
+ * `POST /owner/flats/:flatId/images` answers with the stored Cloudinary URLs, not
+ * with `AccommodationImage` rows, so a newly uploaded photo has no `id` until
+ * the flat is refetched.
+ */
+export type AddedFlatImages = string[];
+
 export interface FlatManager {
   id: string;
   name: string;
