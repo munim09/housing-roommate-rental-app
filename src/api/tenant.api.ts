@@ -1,5 +1,5 @@
-﻿import apiClient from "@/lib/api-client";
-import type { ApiResponse } from "@/types";
+import { authedFetchJson } from "@/lib/auth-fetched";
+import apiClient from "@/lib/api-client";
 
 export interface TenantApplication {
   id: string;
@@ -25,32 +25,32 @@ export interface TenantStay {
   application?: any;
 }
 
-export function getTenantApplications(params?: {
+export async function getTenantApplications(params?: {
   page?: number;
   limit?: number;
 }) {
-  return apiClient<ApiResponse<TenantApplication[]>>("/tenant/applications", {
-    params,
+  const query = params
+    ? "?" +
+      new URLSearchParams(
+        Object.entries(params)
+          .filter(([, v]) => v !== undefined && v !== null)
+          .map(([k, v]) => [k, String(v)]),
+      ).toString()
+    : "";
+  return authedFetchJson(`/tenant/applications${query}`);
+}
+
+export async function getTenantApplication(applicationId: string) {
+  return authedFetchJson(`/tenant/applications/${applicationId}`);
+}
+
+export async function getTenantStays() {
+  return authedFetchJson(`/tenant/stays`);
+}
+
+export function updateTenantApplicationStatus(applicationId: string, status: string) {
+  return apiClient<any>(`/tenant/applications/${applicationId}`, {
+    method: "PATCH",
+    body: { status },
   });
-}
-
-export function updateTenantApplicationStatus(
-  applicationId: string,
-  status: string,
-) {
-  return apiClient<ApiResponse<TenantApplication>>(
-    `/tenant/applications/${applicationId}`,
-    {
-      method: "PATCH",
-      body: { status },
-    },
-  );
-}
-
-export function getTenantApplication(applicationId: string) {
-  return apiClient<ApiResponse<any>>(`/tenant/applications/${applicationId}`);
-}
-
-export function getTenantStays() {
-  return apiClient<ApiResponse<TenantStay[]>>("/tenant/stays");
 }

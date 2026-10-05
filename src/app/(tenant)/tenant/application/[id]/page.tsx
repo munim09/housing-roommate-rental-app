@@ -6,13 +6,15 @@ export default async function ApplicationDetailPage({
   params,
 }: PageProps<"/tenant/application/[id]">) {
   const { id } = await params;
-  const res = await getTenantApplication(id).catch(() => null as any);
-  if (!res?.success || !res.data) notFound();
+  const res = await getTenantApplication(id);
+  const data: any = res?.data ?? res;
+  if (!data) notFound();
 
-  const app = res.data;
+  const app = data;
   const stay = app.stay || app.stays?.[0] || null;
   const stayStatus = stay?.status?.toUpperCase();
-  const showRentInvoices = stayStatus === "WAITING_FOR_PAYMENT" || stayStatus === "CONFIRMED";
+  const showRentInvoices =
+    stayStatus === "WAITING_FOR_PAYMENT" || stayStatus === "CONFIRMED";
   const showUtilityInvoices = true;
 
   return (
@@ -41,13 +43,17 @@ export default async function ApplicationDetailPage({
         <div>
           <h2 className="text-xl font-semibold">Rent Invoices</h2>
           <p className="text-sm text-muted-foreground">
-            {showRentInvoices ? "Pending rent invoices are visible (payment not implemented)" : "Inactive - no rent invoice actions available"}
+            {showRentInvoices
+              ? "Pending rent invoices are visible (payment not implemented)"
+              : "Inactive - no rent invoice actions available"}
           </p>
         </div>
         <div>
           <h2 className="text-xl font-semibold">Utility Invoices</h2>
           <p className="text-sm text-muted-foreground">
-            {showUtilityInvoices ? "All pending utility invoices are open (payment not implemented)" : "No pending utility invoices shown"}
+            {showUtilityInvoices
+              ? "All pending utility invoices are open (payment not implemented)"
+              : "No pending utility invoices shown"}
           </p>
         </div>
       </div>

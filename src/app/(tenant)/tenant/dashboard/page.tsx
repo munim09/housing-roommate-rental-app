@@ -24,8 +24,10 @@ export default function DashboardPage() {
         getTenantApplications(),
         getTenantStays(),
       ]);
-      if (appRes.success) setApps(appRes.data || []);
-      if (stayRes.success) setStays(stayRes.data || []);
+      const appData = (appRes as any)?.data ?? appRes;
+      const stayData = (stayRes as any)?.data ?? stayRes;
+      if ((appRes as any)?.success || Array.isArray(appData)) setApps(Array.isArray(appData) ? appData : []);
+      if ((stayRes as any)?.success || Array.isArray(stayData)) setStays(Array.isArray(stayData) ? stayData : []);
     } catch (e: any) {
       toast.add({ title: "Error", description: e?.message, type: "error" });
     } finally {
