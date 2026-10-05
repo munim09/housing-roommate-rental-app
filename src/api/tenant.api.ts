@@ -47,6 +47,10 @@ export function updateTenantApplicationStatus(
   );
 }
 
+export function getTenantApplication(applicationId: string) {
+  return apiClient<ApiResponse<any>>(`/tenant/applications/${applicationId}`);
+}
+
 export function getTenantStays() {
   return apiClient<ApiResponse<TenantStay[]>>("/tenant/stays");
 }
