@@ -1,14 +1,14 @@
-import { ofetch } from "ofetch";
 import { readAccessToken } from "@/lib/session";
 import type {
-  ApiError,
-  ApiErrorBody,
-  QueryParams,
-  QueryParamValue,
+    ApiError,
+    ApiErrorBody,
+    QueryParams,
+    QueryParamValue,
 } from "@/types";
+import { ofetch } from "ofetch";
 
 const BASE_URL = (
-  process.env.NEXT_PUBLIC_BACKEND_API_URL ?? "http://localhost:5000"
+    process.env.NEXT_PUBLIC_BACKEND_API_URL ?? "http://localhost:5000"
 ).replace(/\/+$/, "");
 const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX ?? "/api/v1";
 
@@ -19,15 +19,16 @@ const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX ?? "/api/v1";
  * the cases where the browser drops those cookies.
  */
 export const apiClient = ofetch.create({
-  baseURL: `${BASE_URL}${API_PREFIX}`,
-  credentials: "include",
-  retry: 0,
-  onRequest({ options }) {
-    const token = readAccessToken();
-    const headers = new Headers(options.headers);
-    if (token) headers.set("Authorization", `Bearer ${token}`);
-    options.headers = headers;
-  },
+    baseURL: `${BASE_URL}${API_PREFIX}`,
+    credentials: "include",
+    retry: 0,
+    onRequest({ options }) {
+        const token = readAccessToken();
+        const headers = new Headers(options.headers);
+        console.log("token", token);
+        if (token) headers.set("Authorization", `Bearer ${token}`);
+        options.headers = headers;
+    },
 });
 
 /**
@@ -38,46 +39,47 @@ export const apiClient = ofetch.create({
  * prefix pieces are joined here so that call cannot drift from `baseURL`.
  */
 export function apiUrl(path: string) {
-  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
 
-  return `${BASE_URL}${API_PREFIX}${cleanPath}`;
+    return `${BASE_URL}${API_PREFIX}${cleanPath}`;
 }
 
 /** Normalises anything thrown by ofetch into a predictable shape for toasts. */
 export function toApiError(error: unknown): ApiError {
-  if (error && typeof error === "object") {
-    const candidate = error as {
-      statusCode?: number;
-      status?: number;
-      data?: ApiErrorBody;
-      message?: string;
-    };
+    if (error && typeof error === "object") {
+        const candidate = error as {
+            statusCode?: number;
+            status?: number;
+            data?: ApiErrorBody;
+            message?: string;
+        };
+
+        return {
+            statusCode: candidate.statusCode ?? candidate.status ?? 500,
+            message:
+                candidate.data?.message ??
+                candidate.message ??
+                "Something went wrong. Please try again.",
+            errors: candidate.data?.errors,
+        };
+    }
 
     return {
-      statusCode: candidate.statusCode ?? candidate.status ?? 500,
-      message:
-        candidate.data?.message ??
-        candidate.message ??
-        "Something went wrong. Please try again.",
-      errors: candidate.data?.errors,
+        statusCode: 500,
+        message: "Something went wrong. Please try again.",
     };
-  }
-
-  return {
-    statusCode: 500,
-    message: "Something went wrong. Please try again.",
-  };
 }
 
 /** Drops empty values so ofetch never sends `?from=&to=`. */
 export function cleanParams<T extends object>(params?: T): QueryParams {
-  if (!params) return {};
+    if (!params) return {};
 
-  return Object.fromEntries(
-    Object.entries(params as Record<string, QueryParamValue>).filter(
-      ([, value]) => value !== undefined && value !== null && value !== "",
-    ),
-  );
+    return Object.fromEntries(
+        Object.entries(params as Record<string, QueryParamValue>).filter(
+            ([, value]) =>
+                value !== undefined && value !== null && value !== "",
+        ),
+    );
 }
 
 export default apiClient;
