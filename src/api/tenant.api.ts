@@ -25,18 +25,28 @@ export interface TenantStay {
   application?: any;
 }
 
-export function getTenantApplications(params?: { page?: number; limit?: number }) {
-  return apiClient<ApiResponse<TenantApplication[]>>("/tenant/applications", { params });
+export function getTenantApplications(params?: {
+  page?: number;
+  limit?: number;
+}) {
+  return apiClient<ApiResponse<TenantApplication[]>>("/tenant/applications", {
+    params,
+  });
 }
 
-export function updateTenantApplicationStatus(applicationId: string, status: string) {
-  return apiClient<ApiResponse<TenantApplication>>(`/tenant/applications/${applicationId}`, {
-    method: "PATCH",
-    body: { status },
-  });
+export function updateTenantApplicationStatus(
+  applicationId: string,
+  status: string,
+) {
+  return apiClient<ApiResponse<TenantApplication>>(
+    `/tenant/applications/${applicationId}`,
+    {
+      method: "PATCH",
+      body: { status },
+    },
+  );
 }
 
 export function getTenantStays() {
   return apiClient<ApiResponse<TenantStay[]>>("/tenant/stays");
 }
-

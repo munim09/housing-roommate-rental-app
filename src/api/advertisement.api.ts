@@ -41,19 +41,31 @@ export function getMyAdvertisements() {
 }
 
 /** `POST /advertisements/flats/:flatId` */
-export function createFlatAdvertisement(flatId: string, body: CreateAdvertisementInput) {
-  return apiClient<ApiResponse<Advertisement>>(`/advertisements/flats/${flatId}`, {
-    method: "POST",
-    body,
-  });
+export function createFlatAdvertisement(
+  flatId: string,
+  body: CreateAdvertisementInput,
+) {
+  return apiClient<ApiResponse<Advertisement>>(
+    `/advertisements/flats/${flatId}`,
+    {
+      method: "POST",
+      body,
+    },
+  );
 }
 
 /** `POST /advertisements/rooms/:roomId` */
-export function createRoomAdvertisement(roomId: string, body: CreateAdvertisementInput) {
-  return apiClient<ApiResponse<Advertisement>>(`/advertisements/rooms/${roomId}`, {
-    method: "POST",
-    body,
-  });
+export function createRoomAdvertisement(
+  roomId: string,
+  body: CreateAdvertisementInput,
+) {
+  return apiClient<ApiResponse<Advertisement>>(
+    `/advertisements/rooms/${roomId}`,
+    {
+      method: "POST",
+      body,
+    },
+  );
 }
 
 /** `PATCH /advertisements/:advertisementId` */
@@ -61,16 +73,25 @@ export function updateAdvertisement(
   advertisementId: string,
   body: Partial<CreateAdvertisementInput>,
 ) {
-  return apiClient<ApiResponse<Advertisement>>(`/advertisements/${advertisementId}`, {
-    method: "PATCH",
-    body,
-  });
+  return apiClient<ApiResponse<Advertisement>>(
+    `/advertisements/${advertisementId}`,
+    {
+      method: "PATCH",
+      body,
+    },
+  );
 }
 
 /** `PATCH /advertisements/:advertisementId/status` */
-export function updateAdvertisementStatus(advertisementId: string, status: string) {
-  return apiClient<ApiResponse<Advertisement>>(`/advertisements/${advertisementId}/status`, {
-    method: "PATCH",
-    body: { status },
-  });
+export function updateAdvertisementStatus(
+  advertisementId: string,
+  status: string,
+) {
+  return apiClient<ApiResponse<Advertisement>>(
+    `/advertisements/${advertisementId}/status`,
+    {
+      method: "PATCH",
+      body: { status },
+    },
+  );
 }
