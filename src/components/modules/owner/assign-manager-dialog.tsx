@@ -99,8 +99,13 @@ export function AssignManagerDialog({ flatId }: { flatId: string }) {
                 placeholder={
                   isLoading ? "Loading managers..." : "Select a manager"
                 }
-              />
+              >
+                {managerId
+                  ? managers.find((m) => m.id === managerId)?.name
+                  : undefined}
+              </SelectValue>
             </SelectTrigger>
+
             {managers.map((manager: FlatManager) => (
               <SelectItem key={manager.id} value={manager.id}>
                 {manager.name}
