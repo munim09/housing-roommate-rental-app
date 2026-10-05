@@ -100,9 +100,12 @@ export default function DashboardPage() {
                   <div key={app.id} className="rounded-lg border p-4">
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div className="flex-1">
-                        <p className="font-medium">
+                        <a
+                          href={`/tenant/application/${app.id}`}
+                          className="font-medium underline-offset-4 hover:underline"
+                        >
                           {app.advertisement?.title || "Application"}
-                        </p>
+                        </a>
                         <p className="text-sm text-muted-foreground">
                           Application Status: {app.status}
                         </p>
