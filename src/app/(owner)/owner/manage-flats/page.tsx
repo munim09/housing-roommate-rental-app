@@ -60,8 +60,8 @@ export default async function ManageFlatsPage({
     authedFetchJson<OwnerProperty[]>("/owner/properties"),
   ]);
 
-  const records = flatsRes.data ?? [];
-  const properties = propertiesRes.data ?? [];
+  const records = ((flatsRes as any)?.data ?? flatsRes ?? []) as any[];
+  const properties = ((propertiesRes as any)?.data ?? propertiesRes ?? []) as any[];
 
   const term = search.toLowerCase();
   const visible = records.filter((record) => {

@@ -54,7 +54,8 @@ export default async function FlatDetailsPage({
   // The flat, its photos and its rooms all arrive in one payload, so this page is
   // a single round trip and needs no query params of its own.
   const flatsRes = await authedFetchJson<OwnerFlatRecord[]>("/owner/flats");
-  const record = findFlatRecord(flatsRes.data ?? [], flatId);
+  const flatsData = (flatsRes as any)?.data ?? flatsRes ?? [];
+  const record = findFlatRecord(flatsData, flatId);
 
   if (!record) {
     return (

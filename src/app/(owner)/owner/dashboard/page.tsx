@@ -48,9 +48,9 @@ export default async function OwnerDashboardPage() {
     authedFetchJson<City[]>(`/cities?limit=${CITY_OPTION_LIMIT}`),
   ]);
 
-  const stats = statsRes.data;
-  const properties = propertiesRes.data ?? [];
-  const areaOptions = toPropertyAreaOptions(cityOptionsRes.data ?? []);
+  const stats = (statsRes as any)?.data ?? statsRes;
+  const properties = (propertiesRes as any)?.data ?? propertiesRes ?? [];
+  const areaOptions = toPropertyAreaOptions(((cityOptionsRes as any)?.data ?? cityOptionsRes ?? []) as any);
   const totals = sumPropertyCapacity(properties);
   const hasAreas = areaOptions.length > 0;
 
