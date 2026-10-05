@@ -1,7 +1,14 @@
-import { type UseQueryOptions, useQueries } from "@tanstack/react-query";
+import {
+  type UseQueryOptions,
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { getAvailableAdvertisements } from "@/api";
 import { toApiError } from "@/lib/api-client";
 import type {
+  Advertisement,
   ApiError,
   ApiResponse,
   AvailableAdvertisement,
@@ -122,4 +129,93 @@ export function useAvailableAdvertisements(filters: ListingSearchFilters) {
       for (const result of results) void result.refetch();
     },
   };
+}
+
+export function useMyAdvertisements() {
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: ["my-advertisements"] as const,
+    queryFn: async () => {
+      const { getMyAdvertisements } = await import("@/api");
+      const { data } = await getMyAdvertisements();
+      return (data ?? []) as import("@/types").Advertisement[];
+    },
+  });
+}
+
+export function useCreateFlatAdvertisement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      flatId,
+      body,
+    }: {
+      flatId: string;
+      body: import("@/api").CreateAdvertisementInput;
+    }) => {
+      const { createFlatAdvertisement } = await import("@/api");
+      return createFlatAdvertisement(flatId, body);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["my-advertisements"] });
+    },
+  });
+}
+
+export function useCreateRoomAdvertisement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      roomId,
+      body,
+    }: {
+      roomId: string;
+      body: import("@/api").CreateAdvertisementInput;
+    }) => {
+      const { createRoomAdvertisement } = await import("@/api");
+      return createRoomAdvertisement(roomId, body);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["my-advertisements"] });
+    },
+  });
+}
+
+export function useUpdateAdvertisement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      advertisementId,
+      body,
+    }: {
+      advertisementId: string;
+      body: Partial<import("@/api").CreateAdvertisementInput>;
+    }) => {
+      const { updateAdvertisement } = await import("@/api");
+      return updateAdvertisement(advertisementId, body);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["my-advertisements"] });
+    },
+  });
+}
+
+export function useUpdateAdvertisementStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      advertisementId,
+      status,
+    }: {
+      advertisementId: string;
+      status: string;
+    }) => {
+      const { updateAdvertisementStatus } = await import("@/api");
+      return updateAdvertisementStatus(advertisementId, status);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["my-advertisements"] });
+    },
+  });
 }
