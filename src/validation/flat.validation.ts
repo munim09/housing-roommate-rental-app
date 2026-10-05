@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { MAX_FLAT_IMAGES } from "@/api/flat.api";
+import { type ImageUploadRules, validateImageFiles } from "./image.validation";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -41,14 +42,6 @@ const descriptionField = z
   .optional()
   .or(z.literal(""));
 
-/** The `images` parts are uploaded raw, so the browser's own types are checked. */
-export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-
-/** `accept` attribute for the file picker. */
-export const FLAT_IMAGE_ACCEPT = ACCEPTED_IMAGE_TYPES.join(",");
-
 /**
  * The `data` part of `POST /properties/:propertyId/flats`, and also the shape
  * `PATCH /flats/:flatId` accepts — the update route carries the same columns
@@ -79,25 +72,17 @@ export const flatSchema = z.object({
 
 export type FlatValues = z.input<typeof flatSchema>;
 
-/** Client-side mirror of the upload rules, so a bad file never leaves the form. */
+/**
+ * Client-side mirror of the upload rules for a flat's photos, so a bad file never
+ * leaves the form. Room photos go through the same shared rules with their own
+ * cap — see `room.validation`.
+ */
 export function validateFlatImages(files: File[]) {
-  if (files.length > MAX_FLAT_IMAGES) {
-    return `You can upload at most ${MAX_FLAT_IMAGES} images.`;
-  }
-
-  const wrongType = files.find(
-    (file) => !ACCEPTED_IMAGE_TYPES.includes(file.type),
-  );
-
-  if (wrongType) {
-    return `“${wrongType.name}” is not a JPG, PNG or WebP image.`;
-  }
-
-  const tooBig = files.find((file) => file.size > MAX_IMAGE_BYTES);
-
-  if (tooBig) {
-    return `“${tooBig.name}” is larger than 5 MB.`;
-  }
-
-  return null;
+  return validateImageFiles(files, MAX_FLAT_IMAGES);
 }
+
+/** The flat photo picker's rules, ready to pass down. */
+export const FLAT_IMAGE_RULES: ImageUploadRules = {
+  max: MAX_FLAT_IMAGES,
+  validate: validateFlatImages,
+};

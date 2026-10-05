@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -16,7 +15,8 @@ import {
 } from "@/components/ui/sheet";
 import { formatAreaSqFt } from "@/lib/format";
 import { type OwnerFlat, primaryFlatImage } from "@/types";
-import { FlatImagesButton } from "./flat-images-dialog";
+import { AddRoomDialog } from "./add-room-dialog";
+import { FlatImagesDialog } from "./flat-images-dialog";
 import { EditFlatButton } from "./flat-row-actions";
 
 export interface FlatRoomsSheetProps {
@@ -30,13 +30,16 @@ export interface FlatRoomsSheetProps {
 }
 
 /**
- * Room details for one flat.
+ * Quick room peek for one flat.
  *
  * This is not a separate request: `GET /owner/flats` embeds each flat's `rooms`,
  * so selecting a flat is a matter of finding the matching record in the payload
  * the page already fetched. Opening it is therefore a URL change
  * (`?flatId=…`), which keeps the drawer deep-linkable and lets the Server
  * Component resolve it.
+ *
+ * Rooms can be added from here, but each one is edited on the flat's own detail
+ * page — `/owner/flats/:id` — which has the room's photos alongside its columns.
  */
 export function FlatRoomsSheet({ flat, closeHref }: FlatRoomsSheetProps) {
   const router = useRouter();
@@ -159,18 +162,10 @@ export function FlatRoomsSheet({ flat, closeHref }: FlatRoomsSheetProps) {
         </div>
 
         <SheetFooter>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled
-            title="Adding rooms is not wired up yet"
-          >
-            <BedDoubleIcon aria-hidden="true" />
-            Add room
-          </Button>
+          <AddRoomDialog flat={flat} />
           {/* Same photo manager as the table row, so a flat's images can be
               changed without leaving the drawer. */}
-          <FlatImagesButton flat={flat} />
+          <FlatImagesDialog flat={flat} />
           <EditFlatButton flat={flat} />
         </SheetFooter>
       </SheetContent>

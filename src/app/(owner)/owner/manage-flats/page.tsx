@@ -142,7 +142,8 @@ export default async function ManageFlatsPage({
                 />
               ) : null}
             </div>
-            {/* The whole row leads here: selecting a flat opens its rooms. */}
+            {/* Clicking the flat number peeks at its rooms in the drawer; the bed
+                button in the row actions opens the flat's own page. */}
             <Link
               href={flatDetailHref(record.flatId)}
               scroll={false}
@@ -205,8 +206,12 @@ export default async function ManageFlatsPage({
         const preview = rooms.slice(0, ROOM_PREVIEW_LIMIT);
         const overflow = rooms.length - preview.length;
 
+        // Rooms are managed on the flat's own page, so the preview leads there.
         return (
-          <span className="flex flex-wrap gap-1.5">
+          <Link
+            href={`/owner/flats/${record.flat.id}`}
+            className="flex w-fit flex-wrap gap-1.5 no-underline"
+          >
             {preview.map((room) => (
               <Badge key={room.id} variant="secondary">
                 {room.roomNumber}
@@ -215,7 +220,7 @@ export default async function ManageFlatsPage({
             {overflow > 0 ? (
               <Badge variant="outline">+{overflow} more</Badge>
             ) : null}
-          </span>
+          </Link>
         );
       },
     },

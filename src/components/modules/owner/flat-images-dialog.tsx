@@ -25,12 +25,17 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useAddFlatImages, useRemoveFlatImage } from "@/hooks";
 import type { FlatImage, OwnerFlat } from "@/types";
-import { FlatImagePicker, type SelectedImage } from "./flat-image-picker";
+import { FLAT_IMAGE_RULES } from "@/validation";
+import { ImagePicker, type SelectedImage } from "./image-picker";
 
 export interface FlatImagesDialogProps {
   flat: OwnerFlat;
-  /** Overrides the row's action button, e.g. from the rooms sheet footer. */
-  trigger?: React.ReactNode;
+  /**
+   * How the trigger is drawn: `"icon"` is the square row/footer affordance, while
+   * `"button"` labels it with the photo count for pages where photo management is
+   * one of the flat's named actions.
+   */
+  appearance?: "icon" | "button";
 }
 
 /**
@@ -44,7 +49,10 @@ export interface FlatImagesDialogProps {
  * after each change — the rows here are a Server Component read, hence
  * `router.refresh()` on top of the mutation's cache invalidation.
  */
-export function FlatImagesDialog({ flat, trigger }: FlatImagesDialogProps) {
+export function FlatImagesDialog({
+  flat,
+  appearance = "icon",
+}: FlatImagesDialogProps) {
   const router = useRouter();
   const addImages = useAddFlatImages();
   const removeImage = useRemoveFlatImage();
@@ -170,12 +178,24 @@ export function FlatImagesDialog({ flat, trigger }: FlatImagesDialogProps) {
         }}
       >
         {/* `render` supplies the button itself so it matches the row's other
-            actions; `trigger` only swaps what is drawn inside it. */}
-        <DialogTrigger render={<Button variant="ghost" size="icon-sm" />}>
-          {trigger ?? <ImagesIcon aria-hidden="true" />}
-          <span className="sr-only">
-            Manage photos of flat {flat.flatNumber}
-          </span>
+            actions; the children are the trigger's own content. */}
+        <DialogTrigger
+          render={
+            appearance === "button" ? (
+              <Button variant="outline" />
+            ) : (
+              <Button variant="ghost" size="icon-sm" />
+            )
+          }
+        >
+          <ImagesIcon aria-hidden="true" />
+          {appearance === "button" ? (
+            `Photos (${images.length})`
+          ) : (
+            <span className="sr-only">
+              Manage photos of flat {flat.flatNumber}
+            </span>
+          )}
         </DialogTrigger>
 
         <DialogContent className="sm:max-w-2xl">
@@ -286,10 +306,12 @@ export function FlatImagesDialog({ flat, trigger }: FlatImagesDialogProps) {
             )}
           </section>
 
-          <FlatImagePicker
+          <ImagePicker
             images={staged}
             onChange={setStaged}
             disabled={addImages.isPending}
+            subject="flat"
+            rules={FLAT_IMAGE_RULES}
           />
 
           {addImages.isPending ? (
@@ -349,12 +371,5 @@ export function FlatImagesDialog({ flat, trigger }: FlatImagesDialogProps) {
         title={`Flat ${flat.flatNumber} photos`}
       />
     </>
-  );
-}
-
-/** Icon-only affordance reused by the rooms sheet footer, next to the edit button. */
-export function FlatImagesButton({ flat }: { flat: OwnerFlat }) {
-  return (
-    <FlatImagesDialog flat={flat} trigger={<ImagesIcon aria-hidden="true" />} />
   );
 }

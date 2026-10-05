@@ -27,8 +27,9 @@ import { toast } from "@/components/ui/toast";
 import { useCreateFlat } from "@/hooks";
 import { toFlatPayload } from "@/lib/to-flat-payload";
 import type { OwnerProperty } from "@/types";
+import { FLAT_IMAGE_RULES } from "@/validation";
 import { FlatFormFields } from "./flat-form-fields";
-import { FlatImagePicker, type SelectedImage } from "./flat-image-picker";
+import { ImagePicker, type SelectedImage } from "./image-picker";
 import { EMPTY_FLAT_VALUES, useFlatForm } from "./use-flat-form";
 
 export interface AddFlatDialogProps {
@@ -212,10 +213,12 @@ export function AddFlatDialog({ properties }: AddFlatDialogProps) {
               </Field>
             ) : null}
 
-            <FlatImagePicker
+            <ImagePicker
               images={images}
               onChange={setImages}
               disabled={createFlat.isPending}
+              subject="flat"
+              rules={FLAT_IMAGE_RULES}
             />
           </div>
 

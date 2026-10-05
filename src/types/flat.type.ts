@@ -36,9 +36,19 @@ export interface FlatRoomSummary {
   status: ResourceStatus;
 }
 
-/** A room as `GET /owner/flats` returns it, images included. */
+/**
+ * A room as `GET /owner/flats` returns it, images included.
+ *
+ * `areaSqFt` and `description` are listed as optional because the list endpoint
+ * does not embed them today — only `PATCH /owner/rooms/:roomId` answers with
+ * them. The add and edit dialogs therefore leave those two boxes blank instead of
+ * pretending to know values the payload never carried, and an empty box is
+ * omitted from the request so the stored value survives.
+ */
 export interface FlatRoom extends FlatRoomSummary {
   images: FlatImage[];
+  areaSqFt?: string | number | null;
+  description?: string | null;
 }
 
 /** The property a flat hangs off, with just enough location to label a row. */

@@ -1,6 +1,7 @@
 "use client";
 
 import { BedDoubleIcon, PencilIcon } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { OwnerFlat } from "@/types";
 import { EditFlatDialog } from "./edit-flat-dialog";
@@ -13,10 +14,9 @@ export interface FlatRowActionsProps {
 /**
  * Per-row write actions.
  *
- * "Add room" is deliberately disabled: the backend has no owner room-create
- * route documented yet, and the assignment forbids faking a flow. It is kept in
- * the row — rather than hidden — so the intended next step is visible while the
- * button explains itself instead of dead-ending.
+ * The bed button is a link, not a mutation: rooms live inside the flat detail
+ * page, which is also where they are added and updated, so the row sends the
+ * owner there instead of opening a second place to manage them.
  */
 export function FlatRowActions({ flat }: FlatRowActionsProps) {
   return (
@@ -27,11 +27,12 @@ export function FlatRowActions({ flat }: FlatRowActionsProps) {
       <Button
         variant="ghost"
         size="icon-sm"
-        disabled
-        title="Adding rooms is not wired up yet"
+        // A `Link` renders an anchor, so Base UI must not expect a real button.
+        nativeButton={false}
+        render={<Link href={`/owner/flats/${flat.id}`} />}
       >
         <BedDoubleIcon aria-hidden="true" />
-        <span className="sr-only">Add rooms to flat {flat.flatNumber}</span>
+        <span className="sr-only">View rooms of flat {flat.flatNumber}</span>
       </Button>
     </div>
   );

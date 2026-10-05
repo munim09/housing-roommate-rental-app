@@ -3,10 +3,9 @@
 import { ImagePlusIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { MAX_FLAT_IMAGES } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError } from "@/components/ui/field";
-import { FLAT_IMAGE_ACCEPT, validateFlatImages } from "@/validation";
+import { IMAGE_ACCEPT, type ImageUploadRules } from "@/validation";
 
 /**
  * A picked file and the blob URL previewing it.
@@ -21,25 +20,31 @@ export interface SelectedImage {
   url: string;
 }
 
-export interface FlatImagePickerProps {
+export interface ImagePickerProps {
   images: SelectedImage[];
   onChange: (images: SelectedImage[]) => void;
   disabled?: boolean;
+  /** Noun for the label and the input's accessible name — "flat", "room". */
+  subject: string;
+  /** Per-request file cap, which differs per endpoint, plus its validator. */
+  rules: ImageUploadRules;
 }
 
 /**
- * Multi-file picker for the `images` parts of the add-flat multipart body.
+ * Multi-file picker for the `images` parts of a multipart body.
  *
  * The files are held here rather than in the TanStack form because a `File`
  * cannot be a controlled input value and the backend only needs them at submit
  * time. Validation mirrors the server rules so an unsupported or oversized file
  * is refused before the request is made.
  */
-export function FlatImagePicker({
+export function ImagePicker({
   images,
   onChange,
   disabled,
-}: FlatImagePickerProps) {
+  subject,
+  rules,
+}: ImagePickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,7 +78,7 @@ export function FlatImagePicker({
     if (!incoming || incoming.length === 0) return;
 
     const accepted = Array.from(incoming);
-    const problem = validateFlatImages([
+    const problem = rules.validate([
       ...images.map((image) => image.file),
       ...accepted,
     ]);
@@ -98,7 +103,7 @@ export function FlatImagePicker({
     onChange(images.filter((_, position) => position !== index));
   }
 
-  const atLimit = images.length >= MAX_FLAT_IMAGES;
+  const atLimit = images.length >= rules.max;
 
   return (
     <Field data-invalid={Boolean(error)}>
@@ -106,8 +111,7 @@ export function FlatImagePicker({
         <div className="grid gap-1">
           <span className="font-medium">Photos</span>
           <span className="text-muted-foreground text-xs">
-            Optional. Up to {MAX_FLAT_IMAGES} images, JPG, PNG or WebP, 5 MB
-            each.
+            Optional. Up to {rules.max} images, JPG, PNG or WebP, 5 MB each.
           </span>
         </div>
         <Button
@@ -125,10 +129,10 @@ export function FlatImagePicker({
       <input
         ref={inputRef}
         type="file"
-        accept={FLAT_IMAGE_ACCEPT}
+        accept={IMAGE_ACCEPT}
         multiple
         className="sr-only"
-        aria-label="Flat photos"
+        aria-label={`${subject} photos`}
         onChange={(event) => addFiles(event.target.files)}
       />
 
