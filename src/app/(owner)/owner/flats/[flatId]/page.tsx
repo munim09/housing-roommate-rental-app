@@ -1,14 +1,23 @@
-import { ArrowLeftIcon, BedDoubleIcon, BuildingIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  BedDoubleIcon,
+  BuildingIcon,
+  UserIcon,
+  UserXIcon,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AddRoomDialog } from "@/components/modules/owner/add-room-dialog";
+import { AssignManagerDialog } from "@/components/modules/owner/assign-manager-dialog";
 import { FlatImagesDialog } from "@/components/modules/owner/flat-images-dialog";
 import { FlatRoomCard } from "@/components/modules/owner/flat-room-card";
 import { EditFlatButton } from "@/components/modules/owner/flat-row-actions";
 import { OwnerNav } from "@/components/modules/owner/owner-nav";
+import { RevokeManagerDialog } from "@/components/modules/owner/revoke-manager-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Empty,
@@ -167,6 +176,50 @@ export default async function FlatDetailsPage({
                   {flat.description ? (
                     <p className="text-sm text-pretty">{flat.description}</p>
                   ) : null}
+
+                  {(() => {
+                    const assignments = flat.managerAssignments ?? [];
+                    const active = assignments.find(
+                      (assignment) =>
+                        assignment.status === "ACTIVE" || !assignment.endedAt,
+                    );
+                    return (
+                      <div className="rounded-lg border p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="grid gap-1">
+                            <div className="flex items-center gap-2 text-sm font-medium">
+                              <UserIcon aria-hidden="true" className="size-4" />
+                              Assigned manager
+                            </div>
+                            {active ? (
+                              <div className="text-sm text-muted-foreground">
+                                <p className="font-medium text-foreground">
+                                  {active.manager?.name}
+                                </p>
+                                {active.manager?.email ? (
+                                  <p>{active.manager.email}</p>
+                                ) : null}
+                                {active.manager?.phone ? (
+                                  <p>{active.manager.phone}</p>
+                                ) : null}
+                              </div>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">
+                                No active manager assigned
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            {active ? (
+                              <RevokeManagerDialog flatId={flat.id} />
+                            ) : (
+                              <AssignManagerDialog flatId={flat.id} />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   <FlatImagesDialog flat={flat} appearance="button" />
                 </CardContent>

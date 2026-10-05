@@ -225,6 +225,19 @@ export default async function ManageFlatsPage({
       },
     },
     {
+      key: "manager",
+      header: "Manager",
+      cell: (record) => {
+        const assignments = record.flat.managerAssignments ?? [];
+        const active = assignments.find(
+          (assignment) => assignment.status === "ACTIVE" || !assignment.endedAt,
+        );
+        return (
+          <span className="text-sm">{active?.manager?.name ?? "None"}</span>
+        );
+      },
+    },
+    {
       key: "status",
       header: "Status",
       cell: (record) => <StatusBadge status={record.flat.status} />,

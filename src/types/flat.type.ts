@@ -18,11 +18,25 @@ export interface FlatManager {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
+  managerProfile?: {
+    id: string;
+    nid: string | null;
+    address: string | null;
+    occupation: string | null;
+  } | null;
 }
 
 export interface FlatManagerAssignment {
   id: string;
+  flatId?: string;
+  managerId?: string;
+  status?: "ACTIVE" | "ENDED";
+  startedAt?: string;
+  endedAt?: string | null;
   manager: FlatManager;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**
@@ -78,6 +92,7 @@ export interface OwnerFlat {
   rooms: FlatRoom[];
   images: FlatImage[];
   managerAssignments: FlatManagerAssignment[];
+  activeManager?: FlatManager | null;
 }
 
 /**

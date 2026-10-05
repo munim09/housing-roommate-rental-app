@@ -95,3 +95,28 @@ export function useRemoveFlatImage() {
     onSuccess: invalidateFlats,
   });
 }
+
+export function useAssignManager() {
+  const invalidateFlats = useInvalidateFlats();
+
+  return useMutation({
+    mutationFn: ({
+      flatId,
+      managerId,
+    }: {
+      flatId: string;
+      managerId: string;
+    }) => import("@/api").then((m) => m.assignManager(flatId, managerId)),
+    onSuccess: invalidateFlats,
+  });
+}
+
+export function useRevokeManager() {
+  const invalidateFlats = useInvalidateFlats();
+
+  return useMutation({
+    mutationFn: ({ flatId }: { flatId: string }) =>
+      import("@/api").then((m) => m.revokeManager(flatId)),
+    onSuccess: invalidateFlats,
+  });
+}

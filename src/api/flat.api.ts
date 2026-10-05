@@ -116,3 +116,40 @@ export function removeFlatImage(flatId: string, imageId: string) {
     method: "DELETE",
   });
 }
+
+/**
+ * `GET /owner/managers` — list active managers available to assign to flats.
+ */
+export async function getActiveManagers() {
+  return apiClient<ApiResponse<import("@/types").FlatManager[]>>(
+    "/owner/managers",
+    {
+      method: "GET",
+    },
+  );
+}
+
+/**
+ * `POST /owner/flats/:flatId/assign-manager` — assign an active manager to the flat.
+ */
+export async function assignManager(flatId: string, managerId: string) {
+  return apiClient<ApiResponse<import("@/types").FlatManagerAssignment>>(
+    `/owner/flats/${flatId}/assign-manager`,
+    {
+      method: "POST",
+      body: { managerId },
+    },
+  );
+}
+
+/**
+ * `POST /owner/flats/:flatId/revoke-manager` — revoke the currently assigned manager.
+ */
+export async function revokeManager(flatId: string) {
+  return apiClient<ApiResponse<import("@/types").FlatManagerAssignment>>(
+    `/owner/flats/${flatId}/revoke-manager`,
+    {
+      method: "POST",
+    },
+  );
+}

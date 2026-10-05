@@ -61,3 +61,25 @@ export function useCities(params: CityQuery = {}) {
       previous,
   });
 }
+
+export function activeManagersQuery() {
+  return {
+    queryKey: ["owner", "managers"] as const,
+    queryFn: async () => {
+      const { getActiveManagers } = await import("@/api");
+      const { data } = await getActiveManagers();
+      return data ?? [];
+    },
+  } as const;
+}
+
+export function useActiveManagers() {
+  return useQuery({
+    queryKey: ["owner", "managers"] as const,
+    queryFn: async () => {
+      const { getActiveManagers } = await import("@/api");
+      const { data } = await getActiveManagers();
+      return (data ?? []) as import("@/types").FlatManager[];
+    },
+  });
+}
