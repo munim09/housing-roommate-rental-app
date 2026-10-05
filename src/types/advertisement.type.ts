@@ -130,3 +130,46 @@ export interface ListingSearchFilters {
   page: number;
   limit: number;
 }
+
+export interface AdvertisementUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  role?: string | null;
+}
+
+export interface AdvertisementFlatRef {
+  id: string;
+  flatNumber?: string | null;
+  floorNumber?: number | null;
+  status?: string | null;
+  property?: AdvertisementProperty | null;
+}
+
+export interface AdvertisementRoomRef {
+  id: string;
+  roomNumber?: string | null;
+  name?: string | null;
+  status?: string | null;
+}
+
+export interface Advertisement {
+  id: string;
+  createdById?: string | null;
+  flatId?: string | null;
+  roomId?: string | null;
+  createdByTenantStayId?: string | null;
+  rentalType: RentalType;
+  title: string;
+  description?: string | null;
+  monthlyRent: string | number;
+  availableFrom: string;
+  availableTo: string;
+  status: string;
+  publishedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: AdvertisementUser | null;
+  flat?: AdvertisementFlatRef | null;
+  room?: AdvertisementRoomRef | null;
+}
