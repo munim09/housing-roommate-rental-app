@@ -10,7 +10,17 @@ import type { UserRole } from "@/types";
 const AUTH_ROUTES = ["/login", "/register", "/verify-email"];
 // `/logout` is public so signing out never bounces an anonymous visitor to
 // `/login?from=/logout` — the handler clears nothing and redirects home anyway.
-const PUBLIC_ROUTES = ["/", "/listings", "/about", "/contact", "/logout"];
+const PUBLIC_ROUTES = [
+  "/",
+  "/listings",
+  "/about",
+  "/contact",
+  "/logout",
+  // SSLCommerz bounces the browser straight here after a transaction, so both
+  // legs of the redirect must render without a session.
+  "/payment/success",
+  "/payment/cancel",
+];
 
 const ADMIN_ROUTES = ["/admin", "/manage-areas"];
 

@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
+import { getInvoicesByStay } from "@/api/invoice.api";
 import { getTenantApplication } from "@/api/tenant.api";
+import { InvoiceSection } from "@/components/modules/tenant/invoice-section";
+import { TenantNav } from "@/components/modules/tenant/tenant-nav";
+import type { Invoice } from "@/types";
 import { CancelApplication } from "./page.client";
 
 export default async function ApplicationDetailPage({
@@ -15,14 +19,38 @@ export default async function ApplicationDetailPage({
   const stayStatus = stay?.status?.toUpperCase();
   const showRentInvoices =
     stayStatus === "WAITING_FOR_PAYMENT" || stayStatus === "CONFIRMED";
-  const showUtilityInvoices = true;
+
+  // Invoices hang off a stay, and the backend answers 404 for an application
+  // that has none yet (rejected, withdrawn, still pending review).
+  const invoiceRes = stay?.id
+    ? await getInvoicesByStay({ stayId: stay.id })
+    : null;
+  const invoices: Invoice[] = invoiceRes?.data ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 space-y-6">
-      <h1 className="text-3xl font-semibold tracking-tight">Application Details</h1>
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-10 sm:px-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Application Details
+          </h1>
+          <p className="max-w-2xl text-sm text-muted-foreground text-pretty">
+            Stay status, invoices and payment history for this application.
+          </p>
+        </div>
+
+        <TenantNav
+          currentLabel={app.advertisement?.title || "Application"}
+          className="w-fit"
+        />
+      </div>
       <div className="rounded-lg border p-4 space-y-2">
-        <p className="font-medium">{app.advertisement?.title || "Application"}</p>
-        <p className="text-sm text-muted-foreground">Application Status: {app.status}</p>
+        <p className="font-medium">
+          {app.advertisement?.title || "Application"}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Application Status: {app.status}
+        </p>
         {app.advertisement && (
           <div className="mt-2 space-y-1 text-sm">
             <p>Description: {app.advertisement.description}</p>
@@ -32,30 +60,32 @@ export default async function ApplicationDetailPage({
         {stay && (
           <div className="mt-2 pl-2 border-l space-y-1">
             <p className="font-medium">Stay {stay.id}</p>
-            <p className="text-sm text-muted-foreground">Stay Status: {stay.status}</p>
+            <p className="text-sm text-muted-foreground">
+              Stay Status: {stay.status}
+            </p>
           </div>
         )}
         <div className="mt-4 flex gap-2">
           <CancelApplication app={app} stay={stay} />
         </div>
       </div>
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-xl font-semibold">Rent Invoices</h2>
-          <p className="text-sm text-muted-foreground">
-            {showRentInvoices
-              ? "Pending rent invoices are visible (payment not implemented)"
-              : "Inactive - no rent invoice actions available"}
-          </p>
-        </div>
-        <div>
-          <h2 className="text-xl font-semibold">Utility Invoices</h2>
-          <p className="text-sm text-muted-foreground">
-            {showUtilityInvoices
-              ? "All pending utility invoices are open (payment not implemented)"
-              : "No pending utility invoices shown"}
-          </p>
-        </div>
+
+      <div className="space-y-8">
+        {showRentInvoices ? (
+          <InvoiceSection invoices={invoices} type="RENT" />
+        ) : (
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold tracking-tight">
+              Rent invoices
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Rent invoices appear once the stay is approved and waiting for
+              payment.
+            </p>
+          </div>
+        )}
+
+        <InvoiceSection invoices={invoices} type="UTILITY" />
       </div>
     </div>
   );

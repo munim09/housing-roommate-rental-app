@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { updateTenantApplicationStatus } from "@/api/tenant.api";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
-import { updateTenantApplicationStatus } from "@/api/tenant.api";
 
 export function CancelApplication({ app, stay }: { app: any; stay: any }) {
   const router = useRouter();
@@ -24,7 +24,11 @@ export function CancelApplication({ app, stay }: { app: any; stay: any }) {
     try {
       const res = await updateTenantApplicationStatus(app.id, "WITHDRAWN");
       if (res.success) {
-        toast.add({ title: "Cancelled", description: res.message, type: "success" });
+        toast.add({
+          title: "Cancelled",
+          description: res.message,
+          type: "success",
+        });
         router.push("/tenant/dashboard");
         router.refresh();
       } else {

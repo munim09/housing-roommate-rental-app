@@ -3,6 +3,7 @@ export * from "./advertisement.hook";
 export * from "./area.hook";
 export * from "./auth.hook";
 export * from "./flat.hook";
+export * from "./payment.hook";
 export * from "./property.hook";
 export * from "./room.hook";
 export * from "./use-debounce";

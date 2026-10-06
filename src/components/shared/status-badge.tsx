@@ -15,14 +15,20 @@ interface StatusPresentation {
 
 /**
  * One badge for every lifecycle status in the app: user accounts, properties,
- * flats and rooms all reuse the same three-state `ACTIVE / INACTIVE / ARCHIVED`
- * vocabulary, so they are listed once here.
+ * flats and rooms share the `ACTIVE / INACTIVE / ARCHIVED` vocabulary, and
+ * invoices and payments add their own `PENDING / PAID` and gateway outcomes.
  */
 const STATUS_PRESENTATION: Record<string, StatusPresentation> = {
   ACTIVE: { label: "Active", variant: "default" },
   INACTIVE: { label: "Inactive", variant: "outline" },
   ARCHIVED: { label: "Archived", variant: "secondary" },
   PENDING_APPROVAL: { label: "Pending", variant: "secondary" },
+  PENDING: { label: "Pending", variant: "secondary" },
+  PAID: { label: "Paid", variant: "default" },
+  CANCELLED: { label: "Cancelled", variant: "outline" },
+  SUCCESS: { label: "Successful", variant: "default" },
+  PROCESSING: { label: "Processing", variant: "secondary" },
+  FAILED: { label: "Failed", variant: "destructive" },
   SUSPENDED: { label: "Suspended", variant: "destructive" },
   REJECTED: { label: "Rejected", variant: "destructive" },
 };
