@@ -1,5 +1,9 @@
 import { cn } from "cn";
-import { Building2Icon, LayoutDashboardIcon } from "lucide-react";
+import {
+  Building2Icon,
+  LayoutDashboardIcon,
+  MegaphoneIcon,
+} from "lucide-react";
 import Link from "next/link";
 
 export interface OwnerNavLink {
@@ -18,6 +22,11 @@ export const OWNER_NAV_LINKS: OwnerNavLink[] = [
     href: "/owner/manage-flats",
     label: "Manage flats",
     icon: Building2Icon,
+  },
+  {
+    href: "/manage-advertisement",
+    label: "Manage advertisements",
+    icon: MegaphoneIcon,
   },
 ];
 

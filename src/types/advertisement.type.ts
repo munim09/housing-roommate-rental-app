@@ -52,7 +52,31 @@ export type AdvertisementStatus =
   | "UNPUBLISHED"
   | "RENTED"
   | "FULL"
+  | "EXPIRED"
   | "ARCHIVED";
+
+/**
+ * The only statuses a user may pick via `PATCH /advertisements/:id/status`.
+ * `DRAFT` is listed because it is a real state (every new advertisement starts
+ * there), but it is never a *choice* — a draft is left behind by publishing.
+ */
+export const ADVERTISEMENT_STATUSES: readonly AdvertisementStatus[] = [
+  "DRAFT",
+  "PUBLISHED",
+  "UNPUBLISHED",
+  "ARCHIVED",
+] as const;
+
+export const ADVERTISEMENT_STATUS_LABELS: Record<AdvertisementStatus, string> =
+  {
+    DRAFT: "Draft",
+    PUBLISHED: "Published",
+    UNPUBLISHED: "Unpublished",
+    RENTED: "Rented",
+    FULL: "Full",
+    EXPIRED: "Expired",
+    ARCHIVED: "Archived",
+  };
 
 /**
  * The `/available-advertisements` payload is not documented in req-res, so this

@@ -61,7 +61,9 @@ export default async function ManageFlatsPage({
   ]);
 
   const records = ((flatsRes as any)?.data ?? flatsRes ?? []) as any[];
-  const properties = ((propertiesRes as any)?.data ?? propertiesRes ?? []) as any[];
+  const properties = ((propertiesRes as any)?.data ??
+    propertiesRes ??
+    []) as any[];
 
   const term = search.toLowerCase();
   const visible = records.filter((record) => {

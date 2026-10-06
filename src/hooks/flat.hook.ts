@@ -1,13 +1,29 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFlatImages, createFlat, removeFlatImage, updateFlat } from "@/api";
 import type { UploadProgress } from "@/lib/upload-multipart";
-import type { CreateFlatInput, UpdateFlatInput } from "@/types";
+import type {
+  CreateFlatInput,
+  OwnerFlatRecord,
+  UpdateFlatInput,
+} from "@/types";
 
 export const flatKeys = {
   all: ["owner", "flats"] as const,
 };
+
+/** `GET /owner/flats` — the full inventory; `OWNER` or `MANAGER`. */
+export function useOwnerFlats() {
+  return useQuery({
+    queryKey: flatKeys.all,
+    queryFn: async () => {
+      const { getOwnerFlats } = await import("@/api");
+      const { data } = await getOwnerFlats();
+      return (data ?? []) as OwnerFlatRecord[];
+    },
+  });
+}
 
 /** Both writes change the owner flat list, so that cache is always dropped. */
 function useInvalidateFlats() {

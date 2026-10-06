@@ -193,12 +193,20 @@ export default async function ManageAreasPage({
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StatCard
                 title="Cities"
-                value={(citiesRes as any)?.meta?.total ?? (cities as any)?.meta?.total ?? cities.length}
+                value={
+                  (citiesRes as any)?.meta?.total ??
+                  (cities as any)?.meta?.total ??
+                  cities.length
+                }
                 description="Matching the current search"
               />
               <StatCard
                 title="Areas"
-                value={(areasRes as any)?.meta?.total ?? (areas as any)?.meta?.total ?? areas.length}
+                value={
+                  (areasRes as any)?.meta?.total ??
+                  (areas as any)?.meta?.total ??
+                  areas.length
+                }
                 description="Matching the current filters"
               />
               <StatCard
@@ -221,12 +229,16 @@ export default async function ManageAreasPage({
                   {
                     value: "cities",
                     label: "Cities",
-                    count: (citiesRes as any)?.meta?.total ?? (cities as any)?.meta?.total,
+                    count:
+                      (citiesRes as any)?.meta?.total ??
+                      (cities as any)?.meta?.total,
                   },
                   {
                     value: "areas",
                     label: "Areas",
-                    count: (areasRes as any)?.meta?.total ?? (areas as any)?.meta?.total,
+                    count:
+                      (areasRes as any)?.meta?.total ??
+                      (areas as any)?.meta?.total,
                   },
                 ]}
               />
@@ -320,4 +332,3 @@ export default async function ManageAreasPage({
     </>
   );
 }
-

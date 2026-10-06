@@ -1,12 +1,12 @@
 "use client";
 
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { login, register, verifyEmail } from "@/api";
 import { readStoredUser } from "@/lib/session";
-import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const authKeys = {
-    all: ["auth"] as const,
-    session: ["auth", "session"] as const,
+  all: ["auth"] as const,
+  session: ["auth", "session"] as const,
 };
 
 /**
@@ -14,28 +14,28 @@ export const authKeys = {
  * `/login` returned, read back from storage and never refetched.
  */
 export function useSession() {
-    return useQuery({
-        queryKey: authKeys.session,
-        queryFn: async () => readStoredUser(),
-        initialData: readStoredUser,
-        staleTime: Infinity,
-    });
+  return useQuery({
+    queryKey: authKeys.session,
+    queryFn: async () => readStoredUser(),
+    initialData: readStoredUser,
+    staleTime: Infinity,
+  });
 }
 
 export function useLogin() {
-    return useMutation({
-        mutationFn: login,
-    });
+  return useMutation({
+    mutationFn: login,
+  });
 }
 
 export function useRegister() {
-    return useMutation({
-        mutationFn: register,
-    });
+  return useMutation({
+    mutationFn: register,
+  });
 }
 
 export function useVerifyEmail() {
-    return useMutation({
-        mutationFn: verifyEmail,
-    });
+  return useMutation({
+    mutationFn: verifyEmail,
+  });
 }

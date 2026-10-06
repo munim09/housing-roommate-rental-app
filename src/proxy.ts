@@ -28,20 +28,36 @@ const OWNER_ROUTES = ["/owner"];
 
 const MANAGER_ROUTES = ["/manager"];
 
+/** Served to both advertiser roles, so the gate below accepts a list of roles. */
+const ADVERTISEMENT_ROUTES = ["/manage-advertisement"];
+
 /**
- * Surfaces that only one role may open. `/manage-areas` sits outside `/admin`
- * because it is its own route, so both admin prefixes are listed explicitly.
+ * Surfaces restricted by role. A route group layout re-checks the same rule,
+ * but the proxy answers first — a `redirect()` emitted by a layout whose page
+ * has a `loading.tsx` boundary streams a truncated 200 shell instead of a 307.
  */
-const ROLE_GATED_ROUTES: { prefixes: string[]; role: UserRole }[] = [
-  { prefixes: ADMIN_ROUTES, role: "ADMIN" },
-  { prefixes: OWNER_ROUTES, role: "OWNER" },
-  { prefixes: MANAGER_ROUTES, role: "MANAGER" },
-];
+const ROLE_GATED_ROUTES: { prefixes: string[]; role: UserRole | UserRole[] }[] =
+  [
+    { prefixes: ADMIN_ROUTES, role: "ADMIN" },
+    { prefixes: OWNER_ROUTES, role: "OWNER" },
+    { prefixes: MANAGER_ROUTES, role: "MANAGER" },
+    { prefixes: ADVERTISEMENT_ROUTES, role: ["OWNER", "MANAGER"] },
+  ];
 
 function matchesPrefix(pathname: string, prefixes: string[]) {
   return prefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
+}
+
+function roleMatches(
+  userRole: UserRole | string | null | undefined,
+  allowed: UserRole | UserRole[],
+) {
+  if (!userRole) return false;
+  return Array.isArray(allowed)
+    ? allowed.includes(userRole as UserRole)
+    : allowed === userRole;
 }
 
 export async function proxy(request: NextRequest) {
@@ -153,7 +169,7 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    if (userRole !== requiredRole) {
+    if (!roleMatches(userRole, requiredRole)) {
       // Role home is a real route for every role now, so a mismatched visitor
       // lands on their own dashboard rather than the public landing page.
       return NextResponse.redirect(

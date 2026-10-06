@@ -1,9 +1,29 @@
-﻿import type { ReactNode } from "react";
+﻿import { redirect } from "next/navigation";
+import { SiteFooter } from "@/components/site/site-footer";
+import { SiteHeader } from "@/components/site/site-header";
+import { getSessionClaims, roleHome } from "@/lib/server-session";
 
-export default function AdvertisementLayout({
+/**
+ * `/manage-advertisement` is served to both `OWNER` and `MANAGER`; every other
+ * role is moved to its own home. The chrome lives here, so any advertisement
+ * page ships with the header, footer and a signed-in session by construction.
+ */
+export default async function AdvertisementLayout({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  const claims = await getSessionClaims();
+  if (!claims) redirect("/login");
+  if (claims.role !== "OWNER" && claims.role !== "MANAGER") {
+    redirect(roleHome(claims.role));
+  }
+
+  return (
+    <>
+      <SiteHeader />
+      <main className="flex-1">{children}</main>
+      <SiteFooter />
+    </>
+  );
 }

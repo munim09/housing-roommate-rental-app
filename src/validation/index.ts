@@ -1,3 +1,4 @@
+export * from "./advertisement.validation";
 export * from "./auth.validation";
 export * from "./flat.validation";
 export * from "./image.validation";

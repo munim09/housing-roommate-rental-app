@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { getTenantApplications, getTenantStays } from "@/api/tenant.api";
 
-export function useTenantApplications(params?: { page?: number; limit?: number }) {
+export function useTenantApplications(params?: {
+  page?: number;
+  limit?: number;
+}) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
