@@ -53,9 +53,9 @@ export async function getSessionClaims(): Promise<SessionClaims | null> {
 }
 
 /**
- * Only ADMIN and OWNER have a surface in this app so far. `ROLE_HOME` also lists
- * `/manager/dashboard` and `/tenant/dashboard`, which would 404, so an
- * unauthorised visitor is sent to the public landing page instead.
+ * Where each role lands after login, and where a mis-role visitor to a private
+ * surface is bounced. `ROLE_HOME` in `src/lib/session.ts` mirrors this for the
+ * client, so keep the two in sync.
  */
 export function roleHome(role: UserRole): string {
   switch (role) {
@@ -63,6 +63,10 @@ export function roleHome(role: UserRole): string {
       return "/admin";
     case "OWNER":
       return "/owner/dashboard";
+    case "MANAGER":
+      return "/manager/dashboard";
+    case "TENANT":
+      return "/tenant/dashboard";
     default:
       return "/";
   }

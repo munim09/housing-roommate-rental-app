@@ -4,6 +4,7 @@ export * from "./area.api";
 export * from "./auth.api";
 export * from "./flat.api";
 export * from "./invoice.api";
+export * from "./manager.api";
 export * from "./payment.api";
 export * from "./property.api";
 export * from "./room.api";

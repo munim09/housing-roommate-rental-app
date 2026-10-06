@@ -26,6 +26,8 @@ const ADMIN_ROUTES = ["/admin", "/manage-areas"];
 
 const OWNER_ROUTES = ["/owner"];
 
+const MANAGER_ROUTES = ["/manager"];
+
 /**
  * Surfaces that only one role may open. `/manage-areas` sits outside `/admin`
  * because it is its own route, so both admin prefixes are listed explicitly.
@@ -33,6 +35,7 @@ const OWNER_ROUTES = ["/owner"];
 const ROLE_GATED_ROUTES: { prefixes: string[]; role: UserRole }[] = [
   { prefixes: ADMIN_ROUTES, role: "ADMIN" },
   { prefixes: OWNER_ROUTES, role: "OWNER" },
+  { prefixes: MANAGER_ROUTES, role: "MANAGER" },
 ];
 
 function matchesPrefix(pathname: string, prefixes: string[]) {
@@ -151,7 +154,11 @@ export async function proxy(request: NextRequest) {
     }
 
     if (userRole !== requiredRole) {
-      return NextResponse.redirect(new URL("/", request.url));
+      // Role home is a real route for every role now, so a mismatched visitor
+      // lands on their own dashboard rather than the public landing page.
+      return NextResponse.redirect(
+        new URL(roleHome(userRole as UserRole), request.url),
+      );
     }
   }
 
