@@ -7,6 +7,7 @@ export * from "./flat.api";
 export * from "./invoice.api";
 export * from "./manager.api";
 export * from "./payment.api";
+export * from "./profile.api";
 export * from "./property.api";
 export * from "./room.api";
 export * from "./stay.api";

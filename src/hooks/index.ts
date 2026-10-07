@@ -6,6 +6,7 @@ export * from "./auth.hook";
 export * from "./flat.hook";
 export * from "./invoice.hook";
 export * from "./payment.hook";
+export * from "./profile.hook";
 export * from "./property.hook";
 export * from "./room.hook";
 export * from "./stay.hook";

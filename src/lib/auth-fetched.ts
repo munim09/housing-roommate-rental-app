@@ -40,7 +40,7 @@ export async function authedFetch(
   input: string,
   init?: RequestInit,
 ): Promise<Response> {
-  console.log("authedFetch....");
+  //   console.log("authedFetch....");
   const cookieStore = await cookies();
   const token = cookieStore.get("accessToken")?.value;
 
@@ -49,7 +49,7 @@ export async function authedFetch(
   }
   // const token = await getToken();
 
-  console.log("token", token);
+  //   console.log("token", token);
   const res = await fetch(API + input, {
     ...init,
     headers: {
@@ -59,7 +59,7 @@ export async function authedFetch(
     },
     cache: "no-store",
   });
-  console.log("authedFetch res", res);
+  //   console.log("authedFetch res", res);
   if (!res.ok) {
     let data: any;
     try {

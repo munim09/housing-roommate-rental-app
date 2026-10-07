@@ -1,7 +1,7 @@
 ﻿import { Building2Icon } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { LogoutButton } from "@/components/site/logout-button";
+import { UserMenu } from "@/components/site/user-menu";
 import { ROLE_HOME, SESSION_COOKIES } from "@/lib/session";
 import type { AuthUser } from "@/types";
 
@@ -9,7 +9,7 @@ export const SITE_NAV_LINKS = [
   //   { href: "/listings", label: "Browse" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#safety", label: "Safety" },
-  { href: "/#owners", label: "For owners" },
+  //   { href: "/#owners", label: "For owners" },
 ] as const;
 
 export function BrandMark() {
@@ -76,18 +76,7 @@ export async function SiteHeader() {
               </Link>
             </>
           ) : (
-            <>
-              <span className="hidden text-sm text-muted-foreground sm:block">
-                {user?.name}
-              </span>
-              <Link
-                href={dashboardHref}
-                className="inline-flex items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 bg-primary text-primary-foreground hover:bg-primary/80"
-              >
-                Dashboard
-              </Link>
-              <LogoutButton />
-            </>
+            <UserMenu name={user?.name} dashboardHref={dashboardHref} />
           )}
         </div>
       </div>

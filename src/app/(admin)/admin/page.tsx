@@ -1,4 +1,9 @@
 ﻿import type { AdminUser, DashboardStats } from "@/api/admin.api";
+import { InventoryChart } from "@/components/charts/inventory-chart";
+import {
+  type RoleCount,
+  UsersByRoleChart,
+} from "@/components/charts/users-by-role-chart";
 import { AdminNav } from "@/components/modules/admin/admin-nav";
 import { UserStatusSelect } from "@/components/modules/admin/user-status-select";
 import {
@@ -16,6 +21,19 @@ export const metadata = {
   title: "Admin Dashboard",
 };
 
+const ROLES = ["ADMIN", "OWNER", "MANAGER", "TENANT"] as const;
+
+/**
+ * `/admin/users?role=` answers with `meta.total`, so one `limit=1` request per
+ * role gives the exact account count without paging through the list.
+ */
+async function fetchRoleCount(role: (typeof ROLES)[number]): Promise<number> {
+  const res = await authedFetch(
+    `/admin/users?role=${role}&limit=1&page=1`,
+  ).then((response) => response.json() as Promise<ApiResponse<unknown[]>>);
+  return res.success ? Number(res.meta?.total ?? 0) : 0;
+}
+
 export default async function AdminDashboardPage({
   searchParams,
 }: PageProps<"/admin">) {
@@ -23,17 +41,22 @@ export default async function AdminDashboardPage({
   const page = Number(params.page) || 1;
   const limit = Number(params.limit) || 10;
 
-  const [statsRes, usersRes] = await Promise.all([
+  const [statsRes, usersRes, roleCounts] = await Promise.all([
     authedFetch("/admin/dashboard").then(
       (res) => res.json() as Promise<ApiResponse<DashboardStats>>,
     ),
     authedFetch(`/admin/users/profiles?page=${page}&limit=${limit}`).then(
       (res) => res.json() as Promise<ApiResponse<AdminUser[]>>,
     ),
+    Promise.all(ROLES.map((role) => fetchRoleCount(role))),
   ]);
 
   const stats = statsRes.data;
   const users = statsRes.success ? (usersRes.data ?? []) : [];
+  const roleData: RoleCount[] = ROLES.map((role, index) => ({
+    role,
+    count: roleCounts[index] ?? 0,
+  }));
 
   // `/admin/users/profiles` answers with a bare array and no `meta`, so the
   // pagination block is rebuilt here with the dashboard `users` count.
@@ -104,6 +127,46 @@ export default async function AdminDashboardPage({
                 />
               </div>
             )}
+
+            {stats ? (
+              <div className="mt-8 grid gap-4 lg:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Users by role</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Admins, owners, managers and tenants side by side, against
+                      the platform total.
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <UsersByRoleChart data={roleData} total={stats.users} />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      Properties, flats &amp; advertisements
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      How much inventory is listed compared with how much is
+                      published for tenants.
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <InventoryChart
+                      data={[
+                        { label: "Properties", count: stats.properties },
+                        { label: "Flats", count: stats.flats },
+                        {
+                          label: "Advertisements",
+                          count: stats.activeAdvertisements,
+                        },
+                      ]}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
 
             <div className="mt-8">
               <Card>

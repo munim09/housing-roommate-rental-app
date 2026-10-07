@@ -1,14 +1,12 @@
 import {
   ArrowRightIcon,
   BadgeCheckIcon,
-  BuildingIcon,
   CalendarCheckIcon,
   CheckIcon,
   FileSignatureIcon,
   HandshakeIcon,
   MapPinnedIcon,
   ShieldCheckIcon,
-  SparklesIcon,
   WalletIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
@@ -18,13 +16,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { parseListingType } from "@/validation";
 
 export const metadata: Metadata = {
@@ -103,11 +95,11 @@ const SAFETY = [
     title: "Digital agreements",
     body: "Every tenancy has a signed record you can reopen anytime.",
   },
-  {
-    icon: BuildingIcon,
-    title: "Vetted properties",
-    body: "Listings stay hidden until the owner's documents check out.",
-  },
+  // {
+  //     icon: BuildingIcon,
+  //     title: "Vetted properties",
+  //     body: "Listings stay hidden until the owner's documents check out.",
+  // },
 ] as const;
 
 function PortfolioMeter({
@@ -261,7 +253,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         </section>
 
         {/* For owners */}
-        <section id="owners" className="scroll-mt-20">
+        {/* <section id="owners" className="scroll-mt-20">
           <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:py-20">
             <div className="grid gap-6">
               <Badge variant="outline" className="w-fit gap-1.5 px-2.5 py-1">
@@ -344,7 +336,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               </CardContent>
             </Card>
           </div>
-        </section>
+        </section> */}
 
         {/* Safety */}
         <section id="safety" className="scroll-mt-20 border-y bg-muted/40">
@@ -359,7 +351,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               </p>
             </div>
 
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {SAFETY.map((item) => (
                 <Card key={item.title}>
                   <CardContent className="grid gap-2">

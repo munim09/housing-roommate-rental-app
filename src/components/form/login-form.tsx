@@ -67,10 +67,10 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
       onSubmit: loginSchema,
     },
     onSubmit: async ({ value }) => {
-      console.log("value", value);
+      //   console.log("value", value);
       login.mutate(value, {
         onSuccess: (res) => {
-          console.log("res", res);
+          //   console.log("res", res);
           if (!res.success) {
             toast.add({
               title: "Server Failure",
@@ -99,7 +99,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           }
         },
         onError: (err) => {
-          console.log("error", err);
+          // console.log("error", err);
           toast.add({
             title: "Login failure",
             description:
