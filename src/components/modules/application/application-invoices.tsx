@@ -19,9 +19,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useApiErrorToast, useInvoicesByStay } from "@/hooks";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { Invoice } from "@/types";
+import { EditUtilityBillButton } from "./utility-bill-dialog";
 
 function invoicePeriod(invoice: Invoice) {
   return `${formatDate(invoice.billingPeriodStart)} → ${formatDate(invoice.billingPeriodEnd)}`;
+}
+
+/** Only an unpaid utility bill can be corrected — the backend locks paid ones. */
+function isEditableUtilityBill(invoice: Invoice) {
+  return (
+    invoice.type === "UTILITY" &&
+    String(invoice.status).toUpperCase() !== "PAID"
+  );
 }
 
 function InvoiceRow({ invoice }: { invoice: Invoice }) {
@@ -70,6 +79,12 @@ function InvoiceRow({ invoice }: { invoice: Invoice }) {
         <p className="text-pretty text-xs text-muted-foreground italic">
           “{invoice.description}”
         </p>
+      ) : null}
+
+      {isEditableUtilityBill(invoice) ? (
+        <div className="flex justify-end border-t pt-2">
+          <EditUtilityBillButton invoice={invoice} />
+        </div>
       ) : null}
     </li>
   );

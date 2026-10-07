@@ -238,7 +238,7 @@ export default async function ManageApplicationPage({
   ];
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-10 sm:px-6">
+    <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-12 sm:px-6 lg:px-8">
       <div className="space-y-4">
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight">

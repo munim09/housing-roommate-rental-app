@@ -7,3 +7,4 @@ export * from "./listing-search.validation";
 export * from "./location.validation";
 export * from "./property.validation";
 export * from "./room.validation";
+export * from "./utility-invoice.validation";

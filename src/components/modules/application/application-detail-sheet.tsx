@@ -34,7 +34,7 @@ import {
 } from "@/types";
 import { ApplicationDecisionButtons } from "./application-decision-buttons";
 import { ApplicationInvoices } from "./application-invoices";
-import { CreateUtilityBillButton } from "./create-utility-bill-button";
+import { CreateUtilityBillButton } from "./utility-bill-dialog";
 
 function rentalTypeLabel(value: string | null | undefined): string {
   if (!value) return "—";
@@ -179,6 +179,13 @@ export function ApplicationDetailSheet({
   const contractUrl = stay?.contractUrl;
   const isPending = application.status === "PENDING";
 
+  const stayId = stay?.id ?? staySummary?.id ?? null;
+  // Statuses can arrive lowercase from the API, so compare uppercased.
+  const stayStatus = String(
+    stay?.status ?? staySummary?.status ?? "",
+  ).toUpperCase();
+  const canRaiseUtilityBill = Boolean(stayId) && stayStatus === "CONFIRMED";
+
   const stayLabel = [
     stay?.property?.name,
     stay?.flat?.flatNumber ? `Flat ${stay.flat.flatNumber}` : null,
@@ -227,7 +234,7 @@ export function ApplicationDetailSheet({
           </div>
         </SheetHeader>
 
-        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto pr-1">
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 pb-4">
           {isPending ? (
             <div className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
               <div className="space-y-1">
@@ -425,7 +432,15 @@ export function ApplicationDetailSheet({
 
         <SheetFooter>
           <div className="flex w-full flex-wrap items-end justify-between gap-3">
-            <CreateUtilityBillButton />
+            <div className="grid gap-1">
+              {canRaiseUtilityBill && stayId ? (
+                <CreateUtilityBillButton stayId={stayId} />
+              ) : hasStay ? (
+                <p className="max-w-64 text-xs text-muted-foreground text-pretty">
+                  A utility bill can be raised once this stay is confirmed.
+                </p>
+              ) : null}
+            </div>
 
             {hasStay ? (
               <Button
