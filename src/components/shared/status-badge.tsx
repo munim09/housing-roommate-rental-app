@@ -31,6 +31,12 @@ const STATUS_PRESENTATION: Record<string, StatusPresentation> = {
   FAILED: { label: "Failed", variant: "destructive" },
   SUSPENDED: { label: "Suspended", variant: "destructive" },
   REJECTED: { label: "Rejected", variant: "destructive" },
+  APPROVED: { label: "Approved", variant: "default" },
+  WITHDRAWN: { label: "Withdrawn", variant: "outline" },
+  EXPIRED: { label: "Expired", variant: "outline" },
+  CONFIRMED: { label: "Confirmed", variant: "default" },
+  WAITING_FOR_PAYMENT: { label: "Awaiting payment", variant: "secondary" },
+  TERMINATED: { label: "Terminated", variant: "outline" },
 };
 
 /** `PENDING_APPROVAL` reads as "Pending" in the UI, never as the raw enum. */

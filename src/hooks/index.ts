@@ -1,5 +1,6 @@
 export * from "./admin.hook";
 export * from "./advertisement.hook";
+export * from "./application.hook";
 export * from "./area.hook";
 export * from "./auth.hook";
 export * from "./flat.hook";

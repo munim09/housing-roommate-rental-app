@@ -253,11 +253,11 @@ export function LoginForm() {
           })}
         </div>
 
-        <p className="text-xs text-muted-foreground">
+        {/* <p className="text-xs text-muted-foreground">
           Demo accounts come from the backend seed. Each one signs in through
           the real <code className="font-mono">POST /login</code> route and
           lands on that role&rsquo;s dashboard.
-        </p>
+        </p> */}
       </div>
     </div>
   );

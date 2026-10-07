@@ -1,5 +1,6 @@
 export * from "./admin.api";
 export * from "./advertisement.api";
+export * from "./application.api";
 export * from "./area.api";
 export * from "./auth.api";
 export * from "./flat.api";

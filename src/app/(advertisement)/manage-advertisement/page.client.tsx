@@ -2,6 +2,7 @@
 
 import { MegaphoneIcon } from "lucide-react";
 import { useState } from "react";
+import { AdvertisementApplicationsDialog } from "@/components/modules/advertisement/advertisement-applications-dialog";
 import { AdvertisementStatusPicker } from "@/components/modules/advertisement/advertisement-status-picker";
 import { advertisementTargetLabel } from "@/components/modules/advertisement/advertisement-target";
 import { CreateAdvertisementDialog } from "@/components/modules/advertisement/create-advertisement-dialog";
@@ -85,7 +86,8 @@ function AdvertisementCard({
           onChange={(status) => onStatusChange(status)}
         />
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex-wrap gap-2">
+        <AdvertisementApplicationsDialog advertisement={advertisement} />
         <EditAdvertisementDialog advertisement={advertisement} />
       </CardFooter>
     </Card>
