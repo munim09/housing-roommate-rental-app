@@ -1,7 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { getOwnerManagerApplications } from "@/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getOwnerManagerApplications, updateApplicationStatus } from "@/api";
+import { stayKeys } from "@/hooks/stay.hook";
 import { toApiError } from "@/lib/api-client";
 import type { ApiError, OwnerManagerApplication } from "@/types";
 
@@ -70,5 +71,33 @@ export function useAdvertisementApplications(
       applications.filter(
         (application) => application.advertisement?.id === advertisementId,
       ),
+  });
+}
+
+/**
+ * Approve / reject an application. Approval creates the stay record, so both
+ * the application feed and the stay list are refetched together.
+ */
+export function useUpdateApplicationStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      applicationId,
+      status,
+    }: {
+      applicationId: string;
+      status: "APPROVED" | "REJECTED" | "WITHDRAWN";
+    }) => {
+      try {
+        return await updateApplicationStatus(applicationId, status);
+      } catch (error) {
+        throw toApiError(error);
+      }
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: applicationKeys.all });
+      void queryClient.invalidateQueries({ queryKey: stayKeys.all });
+    },
   });
 }

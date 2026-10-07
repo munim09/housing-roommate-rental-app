@@ -1,5 +1,11 @@
 import apiClient from "@/lib/api-client";
 import { authedFetchJson } from "@/lib/auth-fetched";
+import type {
+  ApiResponse,
+  ApplicationAdvertisementRef,
+  ApplicationStayRecord,
+  StayApplicationRef,
+} from "@/types";
 
 export interface TenantApplication {
   id: string;
@@ -12,7 +18,9 @@ export interface TenantApplication {
   reviewedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
-  advertisement?: any;
+  advertisement?: ApplicationAdvertisementRef | null;
+  /** Attached once the application is approved. */
+  stay?: ApplicationStayRecord | null;
 }
 
 export interface TenantStay {
@@ -22,14 +30,18 @@ export interface TenantStay {
   startDate?: string;
   endDate?: string;
   monthlyRent?: string | number;
-  application?: any;
+  application?: StayApplicationRef | null;
+}
+
+/** Unwraps the `{ success, data }` envelope the backend uses everywhere. */
+function rowsOf<T>(response: ApiResponse<T[]> | undefined): T[] {
+  return Array.isArray(response?.data) ? response.data : [];
 }
 
 export async function getTenantApplications(params?: {
   page?: number;
   limit?: number;
-}) {
-  console.log("starting...... 1");
+}): Promise<TenantApplication[]> {
   const query = params
     ? "?" +
       new URLSearchParams(
@@ -38,22 +50,28 @@ export async function getTenantApplications(params?: {
           .map(([k, v]) => [k, String(v)]),
       ).toString()
     : "";
-  return authedFetchJson(`/tenant/applications${query}`);
+
+  const response = await authedFetchJson<ApiResponse<TenantApplication[]>>(
+    `/tenant/applications${query}`,
+  );
+  return rowsOf(response);
 }
 
 export async function getTenantApplication(applicationId: string) {
   return authedFetchJson(`/tenant/applications/${applicationId}`);
 }
 
-export async function getTenantStays() {
-  return authedFetchJson(`/tenant/stays`);
+export async function getTenantStays(): Promise<TenantStay[]> {
+  const response =
+    await authedFetchJson<ApiResponse<TenantStay[]>>("/tenant/stays");
+  return rowsOf(response);
 }
 
 export function updateTenantApplicationStatus(
   applicationId: string,
   status: string,
 ) {
-  return apiClient<any>(`/tenant/applications/${applicationId}`, {
+  return apiClient<ApiResponse<null>>(`/tenant/applications/${applicationId}`, {
     method: "PATCH",
     body: { status },
   });

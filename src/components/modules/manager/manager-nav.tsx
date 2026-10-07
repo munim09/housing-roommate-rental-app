@@ -1,5 +1,9 @@
 import { cn } from "cn";
-import { LayoutDashboardIcon, MegaphoneIcon } from "lucide-react";
+import {
+  ClipboardListIcon,
+  LayoutDashboardIcon,
+  MegaphoneIcon,
+} from "lucide-react";
 import Link from "next/link";
 
 export interface ManagerNavLink {
@@ -9,8 +13,9 @@ export interface ManagerNavLink {
 }
 
 /**
- * Sections of the manager surface. Dashboard and advertising are live today;
- * the rest of the manager pages plug into this list as they land.
+ * Sections of the manager surface. Dashboard, advertising and application
+ * review are live today; the rest of the manager pages plug into this list as
+ * they land.
  */
 export const MANAGER_NAV_LINKS: ManagerNavLink[] = [
   {
@@ -22,6 +27,11 @@ export const MANAGER_NAV_LINKS: ManagerNavLink[] = [
     href: "/manage-advertisement",
     label: "Manage advertisements",
     icon: MegaphoneIcon,
+  },
+  {
+    href: "/manage-application",
+    label: "Manage applications",
+    icon: ClipboardListIcon,
   },
 ];
 

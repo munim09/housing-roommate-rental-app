@@ -4,9 +4,10 @@ import { SiteHeader } from "@/components/site/site-header";
 import { getSessionClaims, roleHome } from "@/lib/server-session";
 
 /**
- * `/manage-advertisement` is served to both `OWNER` and `MANAGER`; every other
- * role is moved to its own home. The chrome lives here, so any advertisement
- * page ships with the header, footer and a signed-in session by construction.
+ * `/manage-advertisement` and `/manage-application` are served to both `OWNER`
+ * and `MANAGER`; every other role is moved to its own home. The chrome lives
+ * here, so any owner/manager management page ships with the header, footer and
+ * a signed-in session by construction.
  */
 export default async function AdvertisementLayout({
   children,

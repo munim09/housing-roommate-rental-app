@@ -1,6 +1,7 @@
 import { cn } from "cn";
 import {
   Building2Icon,
+  ClipboardListIcon,
   LayoutDashboardIcon,
   MegaphoneIcon,
 } from "lucide-react";
@@ -27,6 +28,11 @@ export const OWNER_NAV_LINKS: OwnerNavLink[] = [
     href: "/manage-advertisement",
     label: "Manage advertisements",
     icon: MegaphoneIcon,
+  },
+  {
+    href: "/manage-application",
+    label: "Manage applications",
+    icon: ClipboardListIcon,
   },
 ];
 

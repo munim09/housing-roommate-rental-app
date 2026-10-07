@@ -8,3 +8,4 @@ export * from "./invoice.type";
 export * from "./manager.type";
 export * from "./property.type";
 export * from "./room.type";
+export * from "./stay.type";

@@ -19,3 +19,18 @@ export function getOwnerManagerApplications(
     { params: cleanParams(params ?? {}) },
   );
 }
+
+/**
+ * `PATCH /tenant/applications/:id` — owners and managers move a pending
+ * application to `APPROVED` (a stay record is created) or `REJECTED`;
+ * tenants may only withdraw their own.
+ */
+export function updateApplicationStatus(
+  applicationId: string,
+  status: "APPROVED" | "REJECTED" | "WITHDRAWN",
+) {
+  return apiClient<ApiResponse<OwnerManagerApplication | null>>(
+    `/tenant/applications/${applicationId}`,
+    { method: "PATCH", body: { status } },
+  );
+}
