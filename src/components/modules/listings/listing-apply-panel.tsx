@@ -15,6 +15,15 @@ import { useState } from "react";
 import type { TenantApplication } from "@/api/tenant.api";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -29,7 +38,11 @@ import {
   USER_ROLE_LABELS,
   type UserRole,
 } from "@/types";
-import { type ApplicationValues, applicationSchema } from "@/validation";
+import {
+  type ApplicationValues,
+  createApplicationSchema,
+  localToday,
+} from "@/validation";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -42,6 +55,24 @@ function isoDay(value?: string | null): string {
 
 function isValidDay(value: string) {
   return ISO_DATE.test(value) && !Number.isNaN(Date.parse(value));
+}
+
+/**
+ * Turns a failed create response into the lines shown inside the confirmation
+ * modal — the envelope's `message` plus any field-level `errors` the backend
+ * attached (see `req-res/api.txt` for the 400/409 shapes).
+ */
+function toReasonLines(
+  message?: string,
+  errors?: Record<string, string[]>,
+): string[] {
+  const lines = [
+    ...(message ? [message] : []),
+    ...Object.values(errors ?? {}).flat(),
+  ];
+  return lines.length
+    ? lines
+    : ["The server rejected this application. Please try again."];
 }
 
 function StaySummary({
@@ -226,6 +257,13 @@ export function ListingApplyPanel({
   const router = useRouter();
   const create = useCreateApplication();
   const [submitted, setSubmitted] = useState<TenantApplication | null>(null);
+  // The form never sends on the first click: the values are parked here and a
+  // confirmation modal restates them before anything leaves the browser.
+  const [pending, setPending] = useState<ApplicationValues | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  // Why the last attempt failed, kept here so the modal can show the reason
+  // next to the retry button instead of leaving it to a disappearing toast.
+  const [failure, setFailure] = useState<string[]>([]);
 
   const availableFromDay = isoDay(availableFrom);
   const availableToDay = isoDay(availableTo);
@@ -243,62 +281,81 @@ export function ListingApplyPanel({
       note: "",
     } satisfies ApplicationValues,
     validators: {
-      onSubmit: applicationSchema,
+      onSubmit: createApplicationSchema({
+        today: localToday(),
+        availableFrom: availableFromDay,
+        availableTo: availableToDay,
+      }),
     },
     onSubmit: ({ value }) => {
-      create.mutate(
-        {
-          advertisementId,
-          requestedStartDate: value.requestedStartDate,
-          requestedEndDate: value.requestedEndDate,
-          note: value.note.trim() ? value.note.trim() : undefined,
-        },
-        {
-          onSuccess: (response) => {
-            if (!response.success || !response.data) {
-              toast.add({
-                title: "Application not submitted",
-                description:
-                  response.message ??
-                  "The server rejected this application. Please try again.",
-                type: "error",
-              });
-              return;
-            }
-
-            setSubmitted(response.data);
-            toast.add({
-              title: "Application submitted",
-              description:
-                response.message ??
-                `${title} for ${formatDate(response.data.requestedStartDate)} – ${formatDate(response.data.requestedEndDate)}.`,
-              type: "success",
-            });
-          },
-          onError: (error) => {
-            // The form was rendered from a server-checked session; if the
-            // token expired since then, go back through login with this exact
-            // URL (`?from=`) so area and dates survive the round trip.
-            if (error.statusCode === 401) {
-              toast.add({
-                title: "Session expired",
-                description: "Sign in again to submit this application.",
-                type: "error",
-              });
-              router.replace(`/login?from=${encodeURIComponent(returnTo)}`);
-              return;
-            }
-
-            toast.add({
-              title: "Could not submit application",
-              description: error.message,
-              type: "error",
-            });
-          },
-        },
-      );
+      setFailure([]);
+      setPending(value);
+      setConfirming(true);
     },
   });
+
+  /** Sent only from the modal's confirm button, never by the form itself. */
+  function sendApplication(value: ApplicationValues) {
+    create.mutate(
+      {
+        advertisementId,
+        requestedStartDate: value.requestedStartDate,
+        requestedEndDate: value.requestedEndDate,
+        note: value.note.trim() ? value.note.trim() : undefined,
+      },
+      {
+        onSuccess: (response) => {
+          if (!response.success || !response.data) {
+            const reasons = toReasonLines(response.message);
+            setFailure(reasons);
+            toast.add({
+              title: "Application not submitted",
+              description: reasons.join(" "),
+              type: "error",
+            });
+            return;
+          }
+
+          setConfirming(false);
+          setFailure([]);
+          setSubmitted(response.data);
+          toast.add({
+            title: "Application submitted",
+            description:
+              response.message ??
+              `${title} for ${formatDate(response.data.requestedStartDate)} – ${formatDate(response.data.requestedEndDate)}.`,
+            type: "success",
+          });
+        },
+        onError: (error) => {
+          // The form was rendered from a server-checked session; if the
+          // token expired since then, go back through login with this exact
+          // URL (`?from=`) so area and dates survive the round trip.
+          if (error.statusCode === 401) {
+            setConfirming(false);
+            setFailure([]);
+            toast.add({
+              title: "Session expired",
+              description: "Sign in again to submit this application.",
+              type: "error",
+            });
+            router.replace(`/login?from=${encodeURIComponent(returnTo)}`);
+            return;
+          }
+
+          // 409 duplicate/overlap and 400 past-date rejections land here: the
+          // modal stays open and the server's reason is shown inside it.
+          const reasons = toReasonLines(error.message, error.errors);
+          setFailure(reasons);
+          toast.add({
+            title: "Could not submit application",
+            description: reasons.join(" "),
+            type: "error",
+          });
+        },
+      },
+    );
+  }
 
   const summary = (
     <StaySummary
@@ -485,6 +542,87 @@ export function ListingApplyPanel({
           {create.isPending ? null : <ArrowRightIcon aria-hidden="true" />}
         </Button>
       </form>
+
+      {confirming && pending ? (
+        <Dialog
+          open
+          onOpenChange={(next) => {
+            if (!next && !create.isPending) {
+              setConfirming(false);
+              setFailure([]);
+            }
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm your application</DialogTitle>
+              <DialogDescription>
+                This is what the owner will review. Nothing is sent until you
+                confirm below.
+              </DialogDescription>
+            </DialogHeader>
+
+            <dl className="grid gap-3 rounded-xl border bg-muted/40 p-4 text-sm">
+              {[
+                { label: "Listing", value: title },
+                {
+                  label: "Move-in",
+                  value: formatDate(pending.requestedStartDate),
+                },
+                {
+                  label: "Move-out",
+                  value: formatDate(pending.requestedEndDate),
+                },
+                { label: "Monthly rent", value: formatCurrency(monthlyRent) },
+                ...(pending.note.trim()
+                  ? [{ label: "Your note", value: pending.note.trim() }]
+                  : []),
+              ].map((row) => (
+                <div
+                  key={row.label}
+                  className="flex items-start justify-between gap-3"
+                >
+                  <dt className="shrink-0 text-muted-foreground">
+                    {row.label}
+                  </dt>
+                  <dd className="text-right break-words">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            {failure.length ? (
+              <div
+                role="alert"
+                className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2.5 text-sm text-destructive"
+              >
+                <p className="font-medium">Application not submitted</p>
+                <ul className="mt-1 list-disc pl-4">
+                  {failure.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            <DialogFooter>
+              <DialogClose
+                render={<Button type="button" variant="outline" />}
+                disabled={create.isPending}
+              >
+                Go back
+              </DialogClose>
+              <Button
+                type="button"
+                disabled={create.isPending}
+                onClick={() => sendApplication(pending)}
+              >
+                {create.isPending ? <Spinner aria-hidden="true" /> : null}
+                Submit application
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </section>
   );
 }
