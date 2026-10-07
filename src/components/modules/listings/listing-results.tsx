@@ -80,18 +80,18 @@ export function ListingResults({ filters, areaLabel }: ListingResultsProps) {
 
   useApiErrorToast(error, "Could not load listings");
 
-  // Hand the current search back to the hero form so it comes up pre-filled.
-  const adjustHref = (() => {
-    const params = new URLSearchParams({
-      areaId: filters.areaId,
-      from: filters.from,
-      to: filters.to,
-    });
-    if (areaLabel) params.set("area", areaLabel);
-    if (filters.type !== "ANY") params.set("type", filters.type);
+  // The current search, reused by the "adjust search" link and by every card
+  // so the detail page can show the requested dates and come back here.
+  const search = new URLSearchParams({
+    areaId: filters.areaId,
+    from: filters.from,
+    to: filters.to,
+  });
+  if (areaLabel) search.set("area", areaLabel);
+  if (filters.type !== "ANY") search.set("type", filters.type);
 
-    return `/?${params.toString()}`;
-  })();
+  const adjustHref = `/?${search.toString()}`;
+  const detailSearch = search.toString();
 
   if (isError) {
     return (
@@ -156,7 +156,11 @@ export function ListingResults({ filters, areaLabel }: ListingResultsProps) {
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {listings.map((listing) => (
-          <ListingCard key={listing.id} listing={listing} />
+          <ListingCard
+            key={listing.id}
+            listing={listing}
+            detailSearch={detailSearch}
+          />
         ))}
       </div>
 

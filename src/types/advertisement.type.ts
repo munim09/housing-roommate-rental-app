@@ -132,6 +132,75 @@ export interface AvailableAdvertisement {
   } | null;
 }
 
+/** A row of `flat.images` / `room.images` on the detail endpoint. */
+export interface AdvertisementImage {
+  id: string;
+  imageUrl: string;
+  isPrimary?: boolean | null;
+  sortOrder?: number | null;
+}
+
+export interface AvailableAdvertisementRoom {
+  id: string;
+  flatId?: string | null;
+  roomNumber?: string | null;
+  name?: string | null;
+  areaSqFt?: string | number | null;
+  description?: string | null;
+  status?: string | null;
+  images?: AdvertisementImage[] | null;
+}
+
+export interface AvailableAdvertisementProperty extends AdvertisementProperty {
+  type?: string | null;
+  description?: string | null;
+  postalCode?: string | null;
+  latitude?: string | null;
+  longitude?: string | null;
+}
+
+export interface AvailableAdvertisementFlat {
+  id: string;
+  propertyId?: string | null;
+  flatNumber?: string | null;
+  floorNumber?: number | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  areaSqFt?: string | number | null;
+  description?: string | null;
+  status?: string | null;
+  images?: AdvertisementImage[] | null;
+  rooms?: AvailableAdvertisementRoom[] | null;
+  property?: AvailableAdvertisementProperty | null;
+}
+
+export interface AvailableAdvertisementDetail {
+  id: string;
+  createdById?: string | null;
+  flatId?: string | null;
+  roomId?: string | null;
+  rentalType: RentalType;
+  title: string;
+  description?: string | null;
+  monthlyRent: string | number;
+  availableFrom: string;
+  availableTo: string;
+  status: AdvertisementStatus | string;
+  publishedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  } | null;
+  images?: string[] | null;
+  flat?: AvailableAdvertisementFlat | null;
+  room?: AvailableAdvertisementRoom | null;
+  property?: AvailableAdvertisementProperty | null;
+}
+
 export interface AvailableAdvertisementQuery {
   areaId: string;
   from: string;

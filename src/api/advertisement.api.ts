@@ -3,6 +3,7 @@ import type {
   Advertisement,
   ApiResponse,
   AvailableAdvertisement,
+  AvailableAdvertisementDetail,
   AvailableAdvertisementQuery,
 } from "@/types";
 
@@ -28,9 +29,13 @@ export function getAvailableAdvertisements(
   );
 }
 
-/** `GET /available-advertisements/:advertisementId` — public listing detail. */
+/**
+ * `GET /available-advertisements/:advertisementId` — public listing detail.
+ * Unlike the list payload this one resolves the full `flat` / `room` /
+ * `property` graph plus the advertiser, so it has its own response type.
+ */
 export function getAvailableAdvertisement(advertisementId: string) {
-  return apiClient<ApiResponse<AvailableAdvertisement>>(
+  return apiClient<ApiResponse<AvailableAdvertisementDetail>>(
     `/available-advertisements/${advertisementId}`,
   );
 }

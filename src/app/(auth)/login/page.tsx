@@ -16,7 +16,19 @@ export const metadata: Metadata = {
     "Sign in to Dwellio to follow your applications, manage your listings and pay rent.",
 };
 
-export default function LoginPage() {
+function firstRedirectValue(value: string | string[] | undefined) {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return typeof raw === "string" && raw.length > 0 ? raw : undefined;
+}
+
+export default async function LoginPage({ searchParams }: PageProps<"/login">) {
+  // `?from=` is what `src/proxy.ts` appends when it bounces a visitor to the
+  // login page; `?next=` is the alias this app's own links use. Either one
+  // survives the round trip instead of dumping the visitor on a dashboard.
+  const params = await searchParams;
+  const redirectTo =
+    firstRedirectValue(params?.from) ?? firstRedirectValue(params?.next);
+
   return (
     <>
       <SiteHeader />
@@ -69,7 +81,7 @@ export default function LoginPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <LoginForm />
+                <LoginForm redirectTo={redirectTo} />
               </CardContent>
             </Card>
           </div>

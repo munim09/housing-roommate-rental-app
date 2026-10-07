@@ -76,3 +76,22 @@ export function updateTenantApplicationStatus(
     body: { status },
   });
 }
+
+export interface CreateTenantApplicationInput {
+  advertisementId: string;
+  requestedStartDate: string;
+  requestedEndDate: string;
+  note?: string;
+}
+
+/**
+ * `POST /tenant/applications` — a tenant applies for an available
+ * advertisement. The 201 response echoes the created row (PENDING) with a
+ * trimmed `advertisement` reference.
+ */
+export function createTenantApplication(body: CreateTenantApplicationInput) {
+  return apiClient<ApiResponse<TenantApplication>>("/tenant/applications", {
+    method: "POST",
+    body,
+  });
+}

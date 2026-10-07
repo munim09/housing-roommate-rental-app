@@ -2,13 +2,19 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getOwnerManagerApplications, updateApplicationStatus } from "@/api";
+import {
+  type CreateTenantApplicationInput,
+  createTenantApplication,
+  type TenantApplication,
+} from "@/api/tenant.api";
 import { stayKeys } from "@/hooks/stay.hook";
 import { toApiError } from "@/lib/api-client";
-import type { ApiError, OwnerManagerApplication } from "@/types";
+import type { ApiError, ApiResponse, OwnerManagerApplication } from "@/types";
 
 export const applicationKeys = {
   all: ["applications"] as const,
   ownerManager: ["applications", "owner-manager"] as const,
+  tenant: ["applications", "tenant"] as const,
 };
 
 const PAGE_LIMIT = 50;
@@ -98,6 +104,36 @@ export function useUpdateApplicationStatus() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: applicationKeys.all });
       void queryClient.invalidateQueries({ queryKey: stayKeys.all });
+    },
+  });
+}
+
+/**
+ * `POST /tenant/applications` — submitted from the listing detail page. The
+ * tenant dashboard and the owner/manager feed both read this list, so both
+ * caches are invalidated together.
+ */
+export function useCreateApplication() {
+  const queryClient = useQueryClient();
+
+  // `TError` is `ApiError` (the shape `toApiError` normalises to) so call
+  // sites can branch on `statusCode` — for example a 401 after the session
+  // expired between render and submit.
+  return useMutation<
+    ApiResponse<TenantApplication>,
+    ApiError,
+    CreateTenantApplicationInput
+  >({
+    mutationFn: async (body) => {
+      try {
+        return await createTenantApplication(body);
+      } catch (error) {
+        throw toApiError(error);
+      }
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: applicationKeys.all });
+      void queryClient.invalidateQueries({ queryKey: applicationKeys.tenant });
     },
   });
 }

@@ -33,7 +33,24 @@ const ROLE_ICONS: Record<UserRole, typeof UserRoundIcon> = {
   TENANT: UserRoundIcon,
 };
 
-export function LoginForm() {
+/**
+ * Only same-site paths may be a post-login destination, so `?next=` can never
+ * bounce someone to another origin (`//evil.example` is a protocol-relative
+ * URL, not a path).
+ */
+function safeRedirect(value?: string): string | null {
+  if (!value) return null;
+  if (
+    !value.startsWith("/") ||
+    value.startsWith("//") ||
+    value.startsWith("/\\")
+  ) {
+    return null;
+  }
+  return value;
+}
+
+export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [showPassword, setShowPassword] = useState(false);
@@ -76,11 +93,9 @@ export function LoginForm() {
             type: "success",
           });
           if (user.role === "ADMIN") {
-            router.replace("/admin");
+            router.replace(safeRedirect(redirectTo) ?? "/admin");
           } else {
-            console.log("user.role", user.role);
-            console.log("ROLE_HOME[user.role]", ROLE_HOME[user.role]);
-            router.replace(ROLE_HOME[user.role]);
+            router.replace(safeRedirect(redirectTo) ?? ROLE_HOME[user.role]);
           }
         },
         onError: (err) => {

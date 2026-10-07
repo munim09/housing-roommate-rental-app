@@ -37,6 +37,11 @@ const STATUS_PRESENTATION: Record<string, StatusPresentation> = {
   CONFIRMED: { label: "Confirmed", variant: "default" },
   WAITING_FOR_PAYMENT: { label: "Awaiting payment", variant: "secondary" },
   TERMINATED: { label: "Terminated", variant: "outline" },
+  DRAFT: { label: "Draft", variant: "secondary" },
+  PUBLISHED: { label: "Published", variant: "default" },
+  UNPUBLISHED: { label: "Unpublished", variant: "outline" },
+  RENTED: { label: "Rented", variant: "default" },
+  FULL: { label: "Full", variant: "secondary" },
 };
 
 /** `PENDING_APPROVAL` reads as "Pending" in the UI, never as the raw enum. */

@@ -37,12 +37,20 @@ function formatRange(from: string, to: string) {
   return `${startLabel} – ${endLabel}`;
 }
 
-export function ListingCard({ listing }: { listing: AvailableAdvertisement }) {
+export function ListingCard({
+  listing,
+  detailSearch = "",
+}: {
+  listing: AvailableAdvertisement;
+  /** Query string carrying the search (area + dates) to the detail page. */
+  detailSearch?: string;
+}) {
   const size = listing.flat ?? listing.room;
   const location = [listing.property?.area?.name, listing.property?.name]
     .filter(Boolean)
     .join(", ");
   const photo = listing.images?.find((src) => Boolean(src));
+  const detailHref = `/listings/${listing.id}${detailSearch ? `?${detailSearch}` : ""}`;
 
   return (
     <Card className="relative overflow-hidden pt-0 transition-shadow hover:shadow-md">
@@ -70,7 +78,7 @@ export function ListingCard({ listing }: { listing: AvailableAdvertisement }) {
         <div className="grid gap-1">
           <h3 className="line-clamp-1 font-semibold tracking-tight">
             <Link
-              href={`/listings/${listing.id}`}
+              href={detailHref}
               className="after:absolute after:inset-0 focus-visible:underline"
             >
               {listing.title}
