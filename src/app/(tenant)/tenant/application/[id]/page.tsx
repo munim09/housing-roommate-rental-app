@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getInvoicesByStay } from "@/api/invoice.api";
 import { getTenantApplication } from "@/api/tenant.api";
 import { InvoiceSection } from "@/components/modules/tenant/invoice-section";
+import { MaintenanceSection } from "@/components/modules/tenant/maintenance-section";
 import { TenantNav } from "@/components/modules/tenant/tenant-nav";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { formatCurrency, formatDate } from "@/lib/format";
@@ -21,6 +22,9 @@ export default async function ApplicationDetailPage({
   const stayStatus = stay?.status?.toUpperCase();
   const showRentInvoices =
     stayStatus === "WAITING_FOR_PAYMENT" || stayStatus === "CONFIRMED";
+  // A stay starts once its rent is paid (`CONFIRMED`); only then does the
+  // backend accept maintenance requests against it.
+  const stayStarted = stayStatus === "CONFIRMED";
 
   // Invoices hang off a stay, and the backend answers 404 for an application
   // that has none yet (rejected, withdrawn, still pending review).
@@ -118,6 +122,10 @@ export default async function ApplicationDetailPage({
         )}
 
         <InvoiceSection invoices={invoices} type="UTILITY" />
+
+        {stay?.id ? (
+          <MaintenanceSection stayId={stay.id} canCreate={stayStarted} />
+        ) : null}
       </div>
     </div>
   );

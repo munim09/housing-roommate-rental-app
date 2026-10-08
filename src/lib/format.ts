@@ -21,6 +21,27 @@ export function formatDate(value?: string | null): string {
   return parsed.toLocaleDateString("en-GB", DATE_FORMAT);
 }
 
+const DATE_TIME_FORMAT: Intl.DateTimeFormatOptions = {
+  ...DATE_FORMAT,
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+};
+
+/**
+ * Date plus clock time — used where the hour matters (a scheduled visit, a
+ * resolution stamp) and a bare date would read as "resolved on a day".
+ */
+export function formatDateTime(value?: string | null): string {
+  if (!value) return "—";
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) return "—";
+
+  return parsed.toLocaleString("en-GB", DATE_TIME_FORMAT);
+}
+
 /**
  * Every amount in the backend is BDT, so the symbol is fixed rather than
  * derived from a locale. Keeps two decimals only when there is a fraction,

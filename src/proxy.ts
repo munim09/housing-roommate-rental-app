@@ -31,6 +31,9 @@ const MANAGER_ROUTES = ["/manager"];
 /** Served to both advertiser roles, so the gate below accepts a list of roles. */
 const ADVERTISEMENT_ROUTES = ["/manage-advertisement"];
 
+/** The maintenance desk is shared by the two roles that run a property. */
+const MAINTENANCE_ROUTES = ["/manage-maintenance"];
+
 /**
  * Surfaces restricted by role. A route group layout re-checks the same rule,
  * but the proxy answers first — a `redirect()` emitted by a layout whose page
@@ -42,6 +45,7 @@ const ROLE_GATED_ROUTES: { prefixes: string[]; role: UserRole | UserRole[] }[] =
     { prefixes: OWNER_ROUTES, role: "OWNER" },
     { prefixes: MANAGER_ROUTES, role: "MANAGER" },
     { prefixes: ADVERTISEMENT_ROUTES, role: ["OWNER", "MANAGER"] },
+    { prefixes: MAINTENANCE_ROUTES, role: ["OWNER", "MANAGER"] },
   ];
 
 function matchesPrefix(pathname: string, prefixes: string[]) {

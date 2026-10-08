@@ -4,6 +4,7 @@ import {
   ClipboardListIcon,
   LayoutDashboardIcon,
   MegaphoneIcon,
+  WrenchIcon,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -33,6 +34,11 @@ export const OWNER_NAV_LINKS: OwnerNavLink[] = [
     href: "/manage-application",
     label: "Manage applications",
     icon: ClipboardListIcon,
+  },
+  {
+    href: "/manage-maintenance",
+    label: "Maintenance",
+    icon: WrenchIcon,
   },
 ];
 

@@ -5,6 +5,7 @@ export * from "./area.type";
 export * from "./auth.type";
 export * from "./flat.type";
 export * from "./invoice.type";
+export * from "./maintenance.type";
 export * from "./manager.type";
 export * from "./property.type";
 export * from "./room.type";

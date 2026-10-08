@@ -5,6 +5,7 @@ export * from "./flat.validation";
 export * from "./image.validation";
 export * from "./listing-search.validation";
 export * from "./location.validation";
+export * from "./maintenance.validation";
 export * from "./property.validation";
 export * from "./room.validation";
 export * from "./utility-invoice.validation";

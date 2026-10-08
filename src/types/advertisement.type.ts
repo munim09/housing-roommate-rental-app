@@ -43,7 +43,7 @@ export const LISTING_TYPE_RENTAL_TYPES: Record<
     ANY: [undefined],
     FLAT: ["PRIMARY_ENTIRE_FLAT"],
     SINGLE_ROOM: ["PRIMARY_ROOM", "SECONDARY_ROOM"],
-    SHARED_ROOM: ["SECONDARY_ROOM_SHARING"],
+    // SHARED_ROOM: ["SECONDARY_ROOM_SHARING"],
 };
 
 export type AdvertisementStatus =
