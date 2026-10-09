@@ -1,16 +1,11 @@
 ﻿import { Building2Icon } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { MobileNav } from "@/components/site/mobile-nav";
 import { UserMenu } from "@/components/site/user-menu";
 import { ROLE_HOME, SESSION_COOKIES } from "@/lib/session";
+import { SITE_NAV_LINKS } from "@/lib/site-nav";
 import type { AuthUser } from "@/types";
-
-export const SITE_NAV_LINKS = [
-  //   { href: "/listings", label: "Browse" },
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/#safety", label: "Safety" },
-  //   { href: "/#owners", label: "For owners" },
-] as const;
 
 export function BrandMark() {
   return (
@@ -78,6 +73,7 @@ export async function SiteHeader() {
           ) : (
             <UserMenu name={user?.name} dashboardHref={dashboardHref} />
           )}
+          <MobileNav />
         </div>
       </div>
     </header>
