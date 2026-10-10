@@ -6,6 +6,7 @@ import {
   ClipboardListIcon,
   EyeIcon,
   HomeIcon,
+  WalletCardsIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -16,6 +17,7 @@ import {
   type TenantStay,
   updateTenantApplicationStatus,
 } from "@/api/tenant.api";
+import { PaymentHistorySection } from "@/components/modules/tenant/payment-history-section";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -187,6 +189,9 @@ function ApplicationCard({
 }
 
 export function TenantDashboard() {
+  const [activeTab, setActiveTab] = useState<"applications" | "payments">(
+    "applications",
+  );
   const [apps, setApps] = useState<TenantApplication[]>([]);
   const [stays, setStays] = useState<TenantStay[]>([]);
   const [loading, setLoading] = useState(true);
@@ -257,91 +262,126 @@ export function TenantDashboard() {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Applications &amp; stays</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          {loading
-            ? "Loading your applications…"
-            : `${apps.length} application${apps.length === 1 ? "" : "s"}`}
-        </p>
-      </CardHeader>
+    <div className="space-y-4">
+      <div
+        role="tablist"
+        aria-label="Dashboard sections"
+        className="flex w-fit flex-wrap items-center gap-1 rounded-xl border bg-muted/40 p-1"
+      >
+        <Button
+          type="button"
+          variant={activeTab === "applications" ? "secondary" : "ghost"}
+          size="sm"
+          role="tab"
+          aria-selected={activeTab === "applications"}
+          onClick={() => setActiveTab("applications")}
+        >
+          <ClipboardListIcon aria-hidden="true" />
+          Applications &amp; stays
+        </Button>
+        <Button
+          type="button"
+          variant={activeTab === "payments" ? "secondary" : "ghost"}
+          size="sm"
+          role="tab"
+          aria-selected={activeTab === "payments"}
+          onClick={() => setActiveTab("payments")}
+        >
+          <WalletCardsIcon aria-hidden="true" />
+          Payment history
+        </Button>
+      </div>
 
-      <CardContent>
-        {loading ? (
-          <div className="grid gap-4">
-            {[0, 1, 2].map((index) => (
-              <div key={index} className="space-y-3 rounded-xl border p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-48" />
-                    <Skeleton className="h-3 w-32" />
+      {activeTab === "payments" ? (
+        <PaymentHistorySection />
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Applications &amp; stays</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              {loading
+                ? "Loading your applications…"
+                : `${apps.length} application${apps.length === 1 ? "" : "s"}`}
+            </p>
+          </CardHeader>
+
+          <CardContent>
+            {loading ? (
+              <div className="grid gap-4">
+                {[0, 1, 2].map((index) => (
+                  <div key={index} className="space-y-3 rounded-xl border p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-48" />
+                        <Skeleton className="h-3 w-32" />
+                      </div>
+                      <Skeleton className="h-7 w-20" />
+                    </div>
+                    <Skeleton className="h-14 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
                   </div>
-                  <Skeleton className="h-7 w-20" />
-                </div>
-                <Skeleton className="h-14 w-full" />
-                <Skeleton className="h-4 w-2/3" />
+                ))}
               </div>
-            ))}
-          </div>
-        ) : error ? (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <ClipboardListIcon aria-hidden="true" />
-              </EmptyMedia>
-              <EmptyTitle>Could not load your applications</EmptyTitle>
-              <EmptyDescription>{error}</EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => void load()}
-              >
-                Try again
-              </Button>
-            </EmptyContent>
-          </Empty>
-        ) : apps.length === 0 ? (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <ClipboardListIcon aria-hidden="true" />
-              </EmptyMedia>
-              <EmptyTitle>No applications yet</EmptyTitle>
-              <EmptyDescription>
-                Apply for a listing and your applications, stays and rent
-                invoices will appear here.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Link
-                href="/listings"
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "no-underline",
-                )}
-              >
-                Browse listings
-              </Link>
-            </EmptyContent>
-          </Empty>
-        ) : (
-          <ul className="grid gap-4 md:grid-cols-2">
-            {apps.map((application) => (
-              <ApplicationCard
-                key={application.id}
-                application={application}
-                stay={stayMap.get(application.id)}
-                busy={updating === application.id}
-                onWithdraw={handleWithdraw}
-              />
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
+            ) : error ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <ClipboardListIcon aria-hidden="true" />
+                  </EmptyMedia>
+                  <EmptyTitle>Could not load your applications</EmptyTitle>
+                  <EmptyDescription>{error}</EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void load()}
+                  >
+                    Try again
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            ) : apps.length === 0 ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <ClipboardListIcon aria-hidden="true" />
+                  </EmptyMedia>
+                  <EmptyTitle>No applications yet</EmptyTitle>
+                  <EmptyDescription>
+                    Apply for a listing and your applications, stays and rent
+                    invoices will appear here.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Link
+                    href="/listings"
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "no-underline",
+                    )}
+                  >
+                    Browse listings
+                  </Link>
+                </EmptyContent>
+              </Empty>
+            ) : (
+              <ul className="grid gap-4 md:grid-cols-2">
+                {apps.map((application) => (
+                  <ApplicationCard
+                    key={application.id}
+                    application={application}
+                    stay={stayMap.get(application.id)}
+                    busy={updating === application.id}
+                    onWithdraw={handleWithdraw}
+                  />
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }

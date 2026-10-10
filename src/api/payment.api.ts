@@ -1,6 +1,11 @@
 import apiClient, { toApiError } from "@/lib/api-client";
 import { authedFetchJson } from "@/lib/auth-fetched";
-import type { ApiResponse, PaymentInitiation, PaymentRecord } from "@/types";
+import type {
+  ApiResponse,
+  PaymentHistoryItem,
+  PaymentInitiation,
+  PaymentRecord,
+} from "@/types";
 
 /**
  * `POST /payments/create/:invoiceId` — TENANT only, so it rides the httpOnly
@@ -12,6 +17,22 @@ export function createPayment(invoiceId: string) {
     `/payments/create/${invoiceId}`,
     { method: "POST" },
   );
+}
+
+/**
+ * `GET /payments` — the signed-in tenant's payment history. Rides `apiClient`
+ * (httpOnly cookies + Bearer) so client-side hooks can call it directly.
+ */
+export function getTenantPaymentHistory(params?: {
+  page?: number;
+  limit?: number;
+}) {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+  const suffix = query.size > 0 ? `?${query.toString()}` : "";
+
+  return apiClient<ApiResponse<PaymentHistoryItem[]>>(`/payments${suffix}`);
 }
 
 /**

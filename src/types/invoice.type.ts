@@ -74,3 +74,28 @@ export interface PaymentRecord {
   createdAt?: string;
   updatedAt?: string;
 }
+
+/** Embedded invoice inside a `/payments` history row. */
+export interface PaymentHistoryInvoice {
+  id: string;
+  billingPeriodStart: string;
+  billingPeriodEnd: string;
+  dueDate: string;
+  status: BillStatus;
+}
+
+/** Embedded stay inside a `/payments` history row. */
+export interface PaymentHistoryStay {
+  id: string;
+  propertyId: string;
+  flatId: string;
+  roomId?: string | null;
+  startDate?: string;
+  endDate?: string;
+}
+
+/** Row of `GET /payments` — one gateway attempt with its invoice + stay. */
+export interface PaymentHistoryItem extends PaymentRecord {
+  invoice?: PaymentHistoryInvoice | null;
+  stay?: PaymentHistoryStay | null;
+}
